@@ -6,7 +6,6 @@
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Leonardo Nicolas</Authors>
     <Description>A class library for validating documents issued in Brazil; different types of calculations used in Human Resources (or personnel department), financials, etc.</Description>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Brazilian Documents;Brazilian Validations;Brazilian;Validação;Documentos;Validations;CPF;CNPJ;PIS;PASEP;NIS;CNH;Carteira de Motorista;Carta de Motorista;Driver License;IE;Inscrição Estadual;State Registration;Cálculos;Calculations;DP;Departamento Pessoal;Personal Department;RH;Recursos Humanos;Human Resources;Titulo de Eleitor;Voter Title;Brazilian Voter Title;RENAVAM;</PackageTags>
     <RepositoryUrl>https://github.com/leonardon397/BrazilSharpLib</RepositoryUrl>
@@ -21,7 +20,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="LICENSE" Pack="true" PackagePath="" />
+    <None Include="LICENSE" Pack="true" PackagePath="\" />
+    <None Include="BrazilSharp.png" Pack="true" PackagePath="\"/>
+    <None Include="README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 
