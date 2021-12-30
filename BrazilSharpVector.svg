@@ -43,7 +43,7 @@
      </cc:Agent>
     </dc:contributor>
     <cc:license rdf:resource="http://artlibre.org/licence/lal"/>
-    <dc:source>Bandeira do Brasil e o símbolo de cerqília da Wikimedia.</dc:source>
+    <dc:source>Bandeira do Brasil e o símbolo de cerqília obtido na logo do C Sharp, pela Wikimedia.</dc:source>
    </cc:Work>
    <cc:License rdf:about="http://artlibre.org/licence/lal">
     <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
