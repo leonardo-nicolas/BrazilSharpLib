@@ -6,7 +6,7 @@
 		 Assim como também, para cálculos trabalhistas (No momento tem somente o cálculo de 13º proporcional, em breve terá mais), etc.
 
         Para ler a documentação, localize o arquivo LEIAME-BR.html (no repositório do GitHub), pois as informações completas encontram-se lá!
-		 Se quiser baixar o README-BR.html, baixe também a pasta 'docs' e mantenha no mesmo local do arquivo LEIAME-BR.html.
+		 Se quiser baixar o LEIAME-BR.html, baixe também a pasta 'docs' e mantenha no mesmo local do arquivo LEIAME-BR.html.
  		
 		 Se quiser reportar um bug ou sugerir melhorias, fique à vontade para abrir uma issue!
 		 Se quiser contribuir com alguma melhoria mandando pull requests, fique à vontade!
