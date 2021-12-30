@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação da biblioteca Brazil Sharp</title>
+    <link href="./docs/main.css" rel="stylesheet"  type="text/css">
+</head>
+<body>
+    <h1>Documentação de Brazil#</h1>
+    <hr>
+    <h3>Prefácio</h3>
+    <p><span class="par"></span>Com tantas informações que digitamos, alguma coisa sempre acabamos digitando errado, acidentalmente. E, quando se trata de documentos (por exemplo), não pode haver nenhuma informação diferente, como números de documentos errados (como número a mais ou faltando), palavras sem seus devidos acentos, etc. Pois isso pode causar inconsistência na hora de assinar um contrato e reconhecer firma em cartório (por exemplo).</p>
+    <p><span class="par"></span>Pensando nisso, o autor pensou neste projeto e pôs em prática, com a principal intenção de disponibilizar portfólio em seu repositório do GitHub para ter o quê mostrar aos recrutadores e aproveitou também para disponibilizar ao público para importá-lo em seus projetos (Seja clonando repositório ou importando via pacote NuGET).</p>
+    <p><span class="par"></span>Afinal, se puder com que o usuário final evite algum problema por erro de digitação, como enviar uma NF-e com o CNPJ da empresa emissora, inválido, por causa de 1 dígito a mais que saiu acidentalmente na pressa de digitar, por exemplo, é poder evitar piores transtornos futuros.</p>
+    <p><span class="par"></span>Essa é a intenção! Além dessa, também terá mais métodos/funções (Além do método que calcula o 13º), para cálculos trabalhistas e ajudar aqueles que trabalha com Departamento Pessoal ou Recursos Humanos. Só manter a biblioteca atualizada na última versão sempre!</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <hr>
+    <h3>Sumário</h3>
+    <p><a href="#main">Introdução</a></p>
+    <p><a href="#validate">Validação de Documentos:</a> (<b>Nenhum</b> desses métodos precisam de acesso a internet para realizar suas tarefas)</p>
+        <p><span class="par"></span><a href="#validate_cpf">CPF - Validar Cadastro de Pessoa Física</a></p>
+        <p><span class="par"></span><a href="#validate_cnpj">CNPJ - Validar Cadastro Nacional de Pessoa Jurídica</a></p>
+        <p><span class="par"></span><a href="#validate_driverlicense">DriverLicense - Validar Carteira Nacional de Habilitação</a></p>
+        <p><span class="par"></span><a href="#validate_email">Email - Validar Endereço de correio eletrônico</a></p>
+        <p><span class="par"></span><a href="#validate_dateortime">DateOrTime - Validar Data ou Hora</a></p>
+        <p><span class="par"></span><a href="#validate_votertitle">VoterTitle - Validar Título de Eleitor</a></p>
+        <p><span class="par"></span><a href="#validate_pis">PIS - Validar Número de Integração Social: Vale pra PIS e PASEP</a></p>
+        <p><span class="par"></span><a href="#validate_renavam">RENAVAM - Validar Registro Nacional de Veículos Automotores</a></p>
+        <p><span class="par"></span><a href="#validate_numeric">Numeric - Validar Qualquer número</a></p>
+        <p><span class="par"></span><a href="#validate_stateregistration">StateRegistration - Validar Inscrição Estadual</a></p>
+    <p><a href="#utilities">Utilidades...</a></p>
+        <p><span class="par"></span><a href="#utilities_findstatevotertitle">Descobrir o estado em que um título de eleitor foi emitido.</a></p>
+        <p><span class="par"></span><a href="#utilities_brazilianstatestre">Código dos estados brasileiros definidos pelo TRE.</a></p>
+    <p><a href="#calculateworker">Cálculos Trabalhistas</a></p>
+        <p><span class="par"></span><a href="#calculate_13th">Thirteenth - Calcular um 13º proporcional</a></p>
+    <hr>
+        <h3 id="main">Introdução</h3>
+        <p><span class="par"></span>BrazilSharp é uma biblioteca do DotNet Standard 2.0, com as seguintes compatibilidades de biblioteca abaixo (segundo a documentação da <a href="https://docs.microsoft.com/pt-br/dotnet/standard/net-standard" target="_blank">Microsoft</a>):</p>
+        <table cellspacing="0" border="1" cellpadding="0">
+            <thead>
+                <tr>
+                    <td>Bibliotecas</td>
+                    <td>Versões suportadas</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>.NET Framework</td>
+                    <td>4.6.1*, 4.6.2, 4.7, 4.8 e as últimas versões.</td>
+                </tr>
+                <tr>
+                    <td>.NET Core</td>
+                    <td>2.0, 2.1, 2.2, 3.0 e 3.1.</td>
+                </tr>
+                <tr>
+                    <td>.NET</td>
+                    <td>5.0, 6.0 (Testes feitos nesta versão) e as últimas versões.</td>
+                </tr>
+                <tr>
+                    <td>Mono</td>
+                    <td>5.4, 6.4 e as últimas versões.</td>
+                </tr>
+                <tr>
+                    <td>Plataforma universal do Windows</td>
+                    <td>10.0.16299 e TBD, até as versões mais diante.</td>
+                </tr>
+                <tr>
+                    <td>Xamarin.Android</td>
+                    <td>8.0, 10.0 e as últimas versões.</td>
+                </tr>
+                <tr>
+                    <td>Xamarin.iOS</td>
+                    <td>10.14, 12.16, até as versões por diante.</td>
+                </tr>
+                <tr>
+                    <td>Xamarin.Mac</td>
+                    <td>À partir da versão 3,8 por diante</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">
+                        * Embora NuGet considere o .NET Framework 4.6.1 como suporte ao .NET Standard 1.5 a 2.0, há vários problemas com o consumo de bibliotecas .NET Standard que foram criadas para essas versões do .NET Framework 4.6.1. Para .NET Framework projetos que precisam usar essas bibliotecas, recomendamos que você atualize o projeto para o .NET Framework 4.7.2 ou superior.
+                        <br><b>Informação acima vinda da Microsoft.</b>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
+        <p><span class="par"></span>Abaixo os <span class="smcode namespace">namespaces</span>, <span class="smcode class">classes</span>, <span class="smcode struct">estruturas</span>, <span class="smcode interface">interfaces</span>, <span class="smcode enum">enum</span>, <span class="smcode delegate">delegates</span>, <span class="smcode method">métodos</span>, <span class="smcode property">propriedades</span>, <span class="smcode field">campos</span> e suas descrições:</p>
+        <p><span class="par"></span>OBS.: As cores acima definidas, servem para identificar melhor quem é quem...</p>
+        <ul>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp</span></span>: O namespace principal.</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span></span>: Uma classe estática com um conjunto de métodos estáticos para validação de documentos ou outros dados. Mais abaixo os métodos desta classe, modo de se usar e códigos de exemplo.</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Utilities</span></span>: Uma classe estática com um conjunto de métodos estáticos para ser utilizado em algumas situações diversas.</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span></span>: Um enumerador com todos os estados de todo território brasileiro e seu valor é o <a href="https://www.ibge.gov.br/explica/codigos-dos-municipios.php" target="_tab">código do estado IBGE</a>.</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span></span>: Namespace com um conjunto de classes para realização de cálculos diversos.</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode class">WorkersCalculation</span></span>: Uma classe estática com um conjunto de métodos estáticos para cálculos de Recursos Humanos (ou até de Departamento Pessoal).</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode enum">PeriodType</span></span>: Um enumerador para auxiliação do método <span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode class">WorkersCalculation</span>.<span class="smcode method">Thirteenth</span></span>, na hora de usá-lo para fazer cálculo de 13º proporcional.</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp.Exceptions</span></span>: O namespace com todas as classes de excessões (classes herdadas de <span class="code"><span class="smcode namespace">System</span>.<span class="smcode class">Exception</span></span>).</li>
+            <li><span class="code"><span class="smcode namespace">BrazilSharp.Exceptions</span>.<span class="smcode class">StateNotFoundException</span></span>: A classe de erro que será usada por alguns métodos em que o valor for diferente dos valores do enum <span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span></span>.</li>
+        </ul>
+    <hr>
+    <h3 id="validate">Validações</h3>
+        <p><span class="par"></span>Os métodos de validação de documentos e de outros dados, se encontram na classe <span class="code smcode class">Validate</span> (dentro do namespace <span class="code smcode namespace">BrazilSharp</span>) e são métodos estáticos.</p>
+        <p><span class="par"></span>Seu uso consiste apenas em importar o namespace <span class="code smcode namespace">BrazilSharp</span> no arquivo em que se usará os métodos (Ou utilizar o global using no caso do DotNet 6 com o C# 10, ambos por diante) e chamar pelo método desejado diretamente pela classe, sem instanciá-la; uma vez que a classe <span class="code smcode class">Validate</span> é uma classe estática.</p>
+        
+        <p>&nbsp;</p>
+    <h4 id="validate_cpf">CPF</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um CPF verdadeiro ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">CPF</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um CPF válido ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com um CPF para validar..."</span>);
+            <span class="reserved-code">string</span> cpf = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsCpfValid = <span class="class-code">Validate</span>.CPF(cpf);
+            
+            <span class="reserved-code">if</span> (IsCpfValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Este CPF é Válido!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O CPF {0}, não passou no teste! Este CPF é inválido!"</span>, cpf);
+            }
+        }
+    }
+}
+</pre>
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_cnpj">CNPJ</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um CNPJ verdadeiro ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">CNPJ</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um CNPJ válido ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com um CNPJ para validar..."</span>);
+            <span class="reserved-code">string</span> cnpj = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsCnpjValid = <span class="class-code">Validate</span>.CNPJ(cnpj);
+            
+            <span class="reserved-code">if</span> (IsCnpjValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Este CNPJ é Válido!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O CNPJ {0}, não passou no teste! Número inválido!"</span>, cnpj);
+            }
+        }
+    }
+}
+</pre>
+
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_driverlicense">DriverLicense</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é uma CNH verdadeira ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">DriverLicense</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é uma CNH (Carteira Nacional de Habilitação, conhecida como carteira de motorista ou carta de motorista) válida ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com uma CNH para validar..."</span>);
+            <span class="reserved-code">string</span> cnh = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsCnhValid = <span class="class-code">Validate</span>.DriverLicense(cnh);
+            
+            <span class="reserved-code">if</span> (IsCnhValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Esta CNH é Válida!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"A CNH {0}, não passou no teste! Esta CNH é inválida!"</span>, cnh);
+            }
+        }
+    }
+}
+</pre>
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_votertitle">VoterTitle</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um número válido do título de eleitor ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">VoterTitle</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um número de inscrição do título de eleitor válido ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com um CNPJ para validar..."</span>);
+            <span class="reserved-code">string</span> titulo = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsTituloValid = <span class="class-code">Validate</span>.VoterTitle(titulo);
+            
+            <span class="reserved-code">if</span> (IsTituloValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Este título de eleitor é Válido!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O título de eleitor {0}, não passou no teste!"</span>, titulo);
+            }
+        }
+    }
+}
+</pre>
+
+        <p>&nbsp;</p>
+    <h4 id="validate_pis">PIS</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um número de PIS ou PASEP, verdadeiro ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">PIS</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um número de PIS ou PASEP, válido ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com um número do PIS ou do PASEP para validar..."</span>);
+            <span class="reserved-code">string</span> nis = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsNisValid = <span class="class-code">Validate</span>.PIS(nis);
+            
+            <span class="reserved-code">if</span> (IsNisValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Este NIS é Válido!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O NIS {0}, não passou no teste! Número inválido!"</span>, nis);
+            }
+        }
+    }
+}
+</pre>
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_renavam">Renavam</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um número de RENAVAM verdadeiro ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">Renavam</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um número de RENAVAM válido ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com um número do RENAVAM para validar..."</span>);
+            <span class="reserved-code">string</span> renavam = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsRenavamValid = <span class="class-code">Validate</span>.Renavam(renavam);
+            
+            <span class="reserved-code">if</span> (IsRenavamValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Este RENAVAM é Válido!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O RENAVAM {0}, não passou no teste!"</span>, renavam);
+            }
+        }
+    }
+}
+</pre>
+
+        <p>&nbsp;</p>
+    <h4 id="validate_stateregistration">StateRegistration</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é uma inscrição estadual (do estado em que especificar no parâmetro) verdadeiro ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">StateRegistration</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>, <span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span> <span class="smcode field">state</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é uma inscrição estadual válida ou não, de acordo com o valor informado em <span class="code smcode field">state</span>. O parâmetero <span class="code smcode field">Expression</span> O parâmetro <span class="smcode field">Expression</span> aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+        <p><span class="par"></span>ATENÇÃO: O parâmetro <span class="code smcode field">state</span> aceita somente uma única opção do enum <span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span></span>!</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com uma Inscrição Estadual para validar..."</span>);
+            <span class="reserved-code">string</span> ie = <span class="class-code">Console</span>.ReadLine();
+            
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Informe a sigla do estado em que esta IE perteça..."</span>);
+            <span class="reserved-code">string</span> sigla = <span class="class-code">Console</span>.ReadLine();
+            <span class="class-code">BrazilianStates</span> estado = (<span class="class-code">BrazilianStates</span>)<span class="class-code">Enum</span>.Parse(<span class="reserved-code">typeof</span>(<span class="class-code">BrazilianStates</span>), sigla, true);
+            
+            <span class="reserved-code">bool</span> IsIeValid = <span class="class-code">Validate</span>.StateRegistration(ie, estado);
+            
+            <span class="reserved-code">if</span> (IsIeValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Esta IE é Válida para este estado!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"A IE {0} para o estado {1}, não passou no teste!"</span>, ie, sigla);
+            }
+        }
+    }
+}
+</pre>
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_email">Email</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um endereço de E-mail válido ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">Email</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um endereço de E-mail válido ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Desafio: feche os olhos, dê CTRV+Shift+V e após tecle enter..."</span>);
+            <span class="reserved-code">string</span> email = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsEmailValid = <span class="class-code">Validate</span>.Email(email);
+            
+            <span class="reserved-code">if</span> (IsEmailValid)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! \"{0}\" é um e-mail é Válido!"</span>, email);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"\"{0}\" não é um e-mail válido e não passou no teste!"</span>, email);
+            }
+        }
+    }
+}
+</pre>
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_numeric">Numeric</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é de fato um número qualquer ou não. É familiar pra quem é usuário do Visual Basic ou então do VBA do Excel! Só que com a diferenda de que, funciona em qualquer plataforma que rode o DotNET, inclusive até no MONO.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">Numeric</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é de fato um número qualquer ou não, inclusive até números hexadecimais ou binários de qualquer linguagem (Ex.: 0b01101001, 0x123ABC, &HABC123, &B110010110, #FA1234, $3412FA, etc), Octal do Visual Basic (&O2560734), etc. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Desafio: Feche os olhos, aperte qualquer tecla e após tecle enter..."</span>);
+            <span class="reserved-code">string</span> argumento = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> eNumerico = <span class="class-code">Validate</span>.Numeric(argumento);
+            
+            <span class="reserved-code">if</span> (eNumerico)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, o que foi informado é de fato número!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"A informação \"{0}\", que foi passada, não é número!"</span>, argumento);
+            }
+        }
+    }
+}
+</pre>
+
+
+
+        <p>&nbsp;</p>
+    <h4 id="validate_dateortime">DateOrTime</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação passada no parâmetro, é data/hora ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">bool</span> <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Validate</span>.<span class="smcode method">DateOrTime</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um valor válido ou então um objeto de data/hora ou não. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Desafio: feche os olhos e dê CTRL+Shift+V e após tecle enter..."</span>);
+            <span class="reserved-code">string</span> argumento = <span class="class-code">Console</span>.ReadLine();
+            <span class="reserved-code">bool</span> IsDateTime = <span class="class-code">Validate</span>.DateOrTime(argumento);
+            
+            <span class="reserved-code">if</span> (IsDateTime)
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! É Data ou hora!"</span>);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"A informação \"{0}\" que foi passada, não passou no teste!"</span>, argumento);
+            }
+        }
+    }
+}
+</pre>
+    
+
+    <hr>
+    <h3 id="utilities">Utilidades</h3>
+    <p><span class="par"></span>Os métodos de utilidades (como descobrir o estado em que um título de eleitor foi emitido), se encontram na classe <span class="code smcode class">Utilities</span> (dentro do namespace <span class="code smcode namespace">BrazilSharp</span>) e são métodos estáticos.</p>
+    <p><span class="par"></span>Seu uso consiste apenas em importar o namespace <span class="code smcode namespace">BrazilSharp</span> no arquivo em que se usará os métodos (Ou utilizar o global using no caso do DotNet 6 com o C# 10, ambos por diante) e chamar pelo método desejado diretamente pela classe, sem instanciá-la; uma vez que a classe <span class="code smcode class">Utilities</span> é uma classe estática.</p>
+    
+
+
+
+
+    <p>&nbsp;</p>
+    <h4 id="utilities_findstatevotertitle">FindStateVoterTitle</h4>
+        <p><span class="par"></span>Este método é utilizado para "revelar" o estado em que um título de eleitor foi emitido.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span>? <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Utilities</span>.<span class="smcode method">FindStateVoterTitle</span>(<span class="smcode reserved">object</span>? <span class="smcode field">Expression</span>)</span><span class="code"> =&gt;</span> valida qualquer dado em <span class="smcode field">Expression</span>, pra determinar se é um número de inscrição do título de eleitor válido ou não. Sendo válido, retorna algum valor de <span class="code"><span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span></span>. Caso contrário, retorna <span class="code smcode reserved">null</span>. O parâmetro <span class="smcode field">Expression</span> Aceita qualquer tipo de objeto que for entrar no argumento, inclusive Arrays.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Entre com um título de eleitor para descobrir o estado de origem..."</span>);
+            <span class="reserved-code">string</span> titulo = <span class="class-code">Console</span>.ReadLine();
+            <span class="class-code">BrazilianStates</span>? estadoEmissor = <span class="class-code">Utilities</span>.FindStateVoterTitle(titulo);
+            
+            <span class="reserved-code">if</span> (estadoEmissor != <span class="class-code">null</span>)
+            {
+                <span class="reserved-code">string</span> SiglaEstadoEmissor = <span class="class-code">Enum</span>.GetName(<span class="reserved-code">typeof</span>(<span class="class-code">BrazilianStates</span>), estadoEmissor);
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OK, passou no teste! Este título de eleitor é Válido e é de {0}!"</span>,SiglaEstadoEmissor);
+            }
+            <span class="reserved-code">else</span>
+            {
+                <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O título de eleitor {0}, não passou no teste e não tem como saber o estado!"</span>, titulo);
+            }
+        }
+    }
+}
+</pre>
+
+
+    <p>&nbsp;</p>
+    <h4 id="utilities_brazilianstatestre">Código dos estados brasileiros definidos pelo TRE, cujo pode ser encontrado também no título de eleitor.</h4>
+    <p><span class="par"></span>Este campo contém todos os estados brasileiros, cada um com seus respectivos códigos de identificação do estado emissor, definido pelo TRE.</p>
+    <p><span class="par"></span><span class="code"><span class="smcode namespace">System.Collections.Generic</span>.<span class="smcode interface">IReadOnlyDictionary</span>&lt;<span class="smcode namespace">BrazilSharp</span>.<span class="smcode enum">BrazilianStates</span>,<span class="smcode reserved">short</span>&gt; <span class="smcode namespace">BrazilSharp</span>.<span class="smcode class">Utilities</span>.<span class="smcode field">TREBrazilianStatesCode</span>. =></span> Este campo é <b>somente leitura</b>. Ele contém todos os estados brasileiros, cada um com seu código definido pelo TRE.</p>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Informe uma sigla de um estado para saber o código definido pelo TRE..."</span>);
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Se caso for fora do Brasil, informe 'ZZ'."</span>);
+            <span class="reserved-code">string</span> argumento = <span class="class-code">Console</span>.ReadLine();
+            <span class="class-code">BrazilianStates</span> EstadoObtido = <span class="class-code">Enum</span>.Parse(<span class="reserved-code">typeof</span>(<span class="class-code">BrazilianStates</span>), argumento, true);
+            <span class="reserved-code">short</span> CodigoTreDoEstado = <span class="class-code">Utilities</span>.TREBrazilianStatesCode[EstadoObtido];
+            
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O código do estado {0} definido pelo TRE é {1} e pelo IBGE é {2}"</span>,argumento,CodigoTreDoEstado,EstadoObtido);
+        }
+    }
+}
+</pre>
+
+
+
+
+
+    <hr>
+    <h3 id="calculateworker">Cálculos Trabalhistas</h3>
+        <p><span class="par"></span>Conjunto de métodos estáticos para cálculos utilizados no Departamento Pessoal ou até mesmo nos Recursos Humanos. Como Férias (Ainda <strong>EM BREVE</strong>), 13º proporcional, etc.</p>
+        <p><span class="par"></span>Seu uso consiste apenas em importar o namespace <span class="code smcode namespace">BrazilSharp.Calculations</span> no arquivo em que se usará os métodos (Ou utilizar o global using no caso do DotNet 6 com o C# 10, ambos por diante) e chamar pelo método desejado diretamente pela classe, sem instanciá-la; uma vez que a classe <span class="code smcode class">WorkersCalculation</span> é uma classe estática.</p>
+    <p>&nbsp;</p>
+    <h4 id="calculate_13th">Thirteenth</h4>
+        <p><span class="par"></span>Este método é utilizado para validar se alguma informação qualquer no parâmetro, é um número de RENAVAM verdadeiro ou não.</p>
+        <p><span class="par"></span><span class="code"><span class="smcode reserved">double</span> <span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode class">WorkersCalculation</span>.<span class="smcode method">Thirteenth</span>(<span class="smcode reserved">double</span> <span class="smcode field">calculationBasis</span>, <span class="smcode reserved">bool</span> <span class="smcode field">EarlyWarning</span>, <span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode enum">PeriodType</span></span> <span class="smcode field">Regime</span>, <span class="smcode reserved">short</span> <span class="smcode field">HowLongWorked</span>)</span><span class="code"> =&gt;</span> Calcula o 13º proporcional de um empregado. O retorno deste método é <span class="code smcode reserved">Double</span>, com o 13º calculado. Abaixo os detalhes e instruções dos parâmetros deste método:</p>
+        <table border="1" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr style="font-weight: bolder;">
+                    <td>Nome do parâmetro</td>
+                    <td>Tipo</td>
+                    <td>Descrição</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>calculationBasis</td>
+                    <td><span class="code"><span class="smcode reserved">double</span></span></td>
+                    <td>A base de cálculo para o 13º...</td>
+                </tr>
+                <tr>
+                    <td>EarlyWarning</td>
+                    <td><span class="code"><span class="smcode reserved">bool</span></span></td>
+                    <td>Defina <span class="code smcode reserved">true</span> se o empregado estiver de aviso prévio. Se não for o caso, <span class="code smcode reserved">false</span>!</td>
+                </tr>
+                <tr>
+                    <td>Regime</td>
+                    <td><span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode enum">PeriodType</span></span></td>
+                    <td>
+                        <p>O calculo será feito em cima de DIAS ou MESES?</p>
+                        <p>Informe <span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode enum">PeriodType</span>.Day</span> para calcular em DIAS</p>
+                        <p>Informe <span class="code"><span class="smcode namespace">BrazilSharp.Calculations</span>.<span class="smcode enum">PeriodType</span>.Month</span> para calcular em MESES</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>HowLongWorked</td>
+                    <td><span class="code"><span class="smcode reserved">short</span></span></td>
+                    <td>
+                        <p>Se o calculo for feito em cima de DIAS, informe entre 1 e 31, quantos dias o empregado trabalhou!</p>
+                        <p>Se o calculo for feito em cima de MESES, informe entre 1 e 12, quantos meses o empredado trabalhou!</p>
+                        <p>Caso esteja fora do intervalo citado acima, um erro do tipo <span class="code"><span class="smcode namespace">System</span>.<span class="smcode class">ArgumentOutOfRangeException</span></span> será lançado!</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+<pre class="code">
+<span class="comment">// Code in C#</span>
+<span class="reserved-code">using</span> System;
+<span class="reserved-code">using</span> BrazilSharp;
+<span class="reserved-code">using</span> BrazilSharp.Calculations;
+
+<span class="reserved-code">namespace</span>  ConsoleApp1 
+{
+    <span class="reserved-code">public class</span> <span class="class-code">Program</span>
+    {
+        <span class="reserved-code">public static void</span> Main(<span class="reserved-code">string</span>[] args)
+        {
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Vamos Calcular o 13º Proporcional"</span>);
+
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Digite o nome do empregado"</span>);
+            <span class="reserved-code">string</span> nome = <span class="class-code">Console</span>.ReadLine();
+            
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Informe o salário + adicional noturno + insalubridade + outros ganhos previstos em lei..."</span>);
+            <span class="reserved-code">double</span> BaseDeCalculo = <span class="class-code">Convert</span>.ToDouble(<span class="class-code">Console</span>.ReadLine());
+            
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Aviso Prévio? Tecle 'S' ou 'N'."</span>);
+            <span class="reserved-code">char</span> RespostaAvisoPrevio = <span class="class-code">Console</span>.ReadKey();
+            <span class="reserved-code">bool</span> AvisoPrevio = RespostaAvisoPrevio == 'S' || RespostaAvisoPrevio == 's';
+
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Informe 'Day' se o cálculo será feito EM DIAS:"</span>);
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"OU"</span>);
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Informe 'Month' se o calculo será feito EM MESES:"</span>);
+            <span class="reserved-code">string</span> RespostaRegimeDeCalculo = <span class="class-code">Console</span>.ReadLine();
+            <span class="class-code">PeriodType</span> RegimeDeCalculo = <span class="class-code">Enum</span>.Parse(<span class="reserved-code">typeof</span>(<span class="class-code">PeriodType</span>), RespostaRegimeDeCalculo, <span class="reserved-code">false</span>);
+
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Quantos \"{0}'s\" que {1} trabalhou?"</span>, RespostaRegimeDeCalculo, nome);
+            <span class="reserved-code">short</span> PeriodoTrabalhado = <span class="class-code">Convert</span>.ToInt16(<span class="class-code">Console</span>.ReadLine());
+
+            <span class="reserved-code">double</span> ResultadoDoCaculo = <span class="class-code">WorkersCalculation</span>.Thirteenth(BaseDeCalculo, AvisoPrevio, RegimeDeCalculo, PeriodoTrabalhado);
+            
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"O décimo terceiro de {0} é de {1}."</span>, nome, ResultadoDoCalculo);
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Se somar ao salário e o restante da base de cálculo, vai dar {0}"</span>, nome);
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Parabéns {0}! Tá com muita da grana em!!!"</span>, nome);
+            <span class="class-code">Console</span>.WriteLine(<span class="string-code">"Me dá uma garoupa ou um lobo-guará? Brincadeira! :D :D"</span>);
+        }
+    }
+}
+</pre>
+    </body>
+</html>
+
