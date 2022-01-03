@@ -89,6 +89,6 @@ namespace BrazilSharp
                 return TREBrazilianStatesCode.Where(data => Convert.ToInt16(svt.Substring(8, 2)) == data.Value).FirstOrDefault().Key;
         }
 
-
+        
     }
 }
