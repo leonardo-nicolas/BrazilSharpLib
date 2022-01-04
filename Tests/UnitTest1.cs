@@ -1,6 +1,6 @@
-using NUnit.Framework;
 using BrazilSharp;
 using BrazilSharp.Calculations;
+using NUnit.Framework;
 
 namespace Tests
 {
@@ -10,7 +10,7 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
-
+            System.Globalization.CultureInfo.CurrentCulture ??= System.Globalization.CultureInfo.CreateSpecificCulture("EN-US");
         }
 
         [Test]
