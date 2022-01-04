@@ -414,8 +414,8 @@ End Module
 <a id="utilities"></a>
 
 ## 3 - Utilidades
-Os métodos de utilidades (como descobrir o estado em que um título de eleitor foi emitido), se encontram na _classe_ `Utilities` (dentro do _namespace_ `BrazilSharp`) e são métodos estáticos.<br>
-Seu uso consiste apenas em importar o _namespace_ `BrazilSharp` no arquivo em que se usará os métodos (Ou utilizar o global using no caso do DotNet 6 com o C# 10, ambos por diante) e chamar pelo método desejado diretamente pela _classe_, sem instanciá-la; uma vez que a _classe_ `Utilities` é uma _classe_ estática.
+Os _métodos_ de utilidades (como descobrir o estado em que um título de eleitor foi emitido), se encontram na _classe_ `Utilities` (dentro do _namespace_ `BrazilSharp`) e são _métodos_ estáticos.<br>
+Seu uso consiste apenas em importar o _namespace_ `BrazilSharp` no arquivo em que se usará os _métodos_ (Ou utilizar o global using no caso do DotNet 6 com o C# 10, ambos por diante) e chamar pelo método desejado diretamente pela _classe_, sem instanciá-la; uma vez que a _classe_ `Utilities` é uma _classe_ estática.
 
 <a id="utilities_findstatevotertitle"></a>
 
@@ -435,12 +435,12 @@ ATENÇÃO IMPORTANTE: Estes números de título de eleitor expostos, foram gerad
 // Exemplo uso em C#
 BazilSharp.BrazilianStates? issuerState = BrazilSharp.Utilities.FindStateVoterTitle(552667570396);
 if(issuerState != null && issuerState != BrazilSharp.BrazilianStates.ZZ)
-    Console.WriteLine("Este título de eleitor foi emitido no(a) {0} - {1}", issuerState, issuerState.Value.GetFullName())
+    Console.WriteLine("Este título de eleitor foi emitido no(a) {0} - {1}", issuerState, issuerState.Value.GetFullName());
     // O Método (de extensão) GetGullName() será abordado no próximo tópico.
 else if(issuerState != null && issuerState == BrazilSharp.BrazilianStates.ZZ)
-    Console.WriteLine("Este título de eleitor foi emitido no exterior, mais provável no consulado do Brasil, em algum país...")
+    Console.WriteLine("Este título de eleitor foi emitido no exterior, mais provável no consulado do Brasil, em algum país...");
 else
-    Console.WriteLine("Título de eleitor inválido!")
+    Console.WriteLine("Título de eleitor inválido!");
 ```
 ```VB
 ' Exemplo uso em Visual Basic .NET
