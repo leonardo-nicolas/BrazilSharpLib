@@ -9,27 +9,27 @@ namespace BrazilSharp
         internal static string GetMsgErrorStateRegistration() =>
             Convert.ToString(
                 typeof(LanguageThrowHelper)
-                .GetTypeInfo()
-                .GetField(
+                .GetTypeInfo()?
+                .GetProperty(
                     nameof(GetMsgErrorStateRegistration)
                     .Substring(3)
-                )
+                )?
                 .GetValue(
                     Languages.GetDefaultLanguageThrowHelper()
-                )
+                ) ?? string.Empty
             );
 
         internal static string GetMsgErrorNameBrazilianState() =>
             Convert.ToString(
                 typeof(LanguageThrowHelper)
-                .GetTypeInfo()
-                .GetField(
+                .GetTypeInfo()?
+                .GetProperty(
                     nameof(GetMsgErrorNameBrazilianState)
                     .Substring(3)
-                )
+                )?
                 .GetValue(
                     Languages.GetDefaultLanguageThrowHelper()
-                )
+                ) ?? string.Empty
             );
 
         internal static string GetMsgErrorThirteenthOutOfRange(PeriodType regime) { 
@@ -38,16 +38,16 @@ namespace BrazilSharp
              case PeriodType.Month:
                     return Convert.ToString(
                         typeof(LanguageThrowHelper)
-                        .GetTypeInfo()
-                        .GetField(
+                        .GetTypeInfo()?
+                        .GetProperty(
                             nameof(GetMsgErrorThirteenthOutOfRange)
-                            .Substring(3) + "_" + 
-                            Extensions.GetEnumName(regime)
-                        )
+                            .Substring(3) + "With" + 
+                            Enum.GetName(typeof(PeriodType), regime)
+                        )?
                         .GetValue(
                             Languages
                             .GetDefaultLanguageThrowHelper()
-                        )
+                        ) ?? string.Empty
                     );
             default: return string.Empty;
             }

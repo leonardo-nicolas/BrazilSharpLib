@@ -1,220 +1,153 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Reflection;
 using BrazilSharp.Exceptions;
 
-namespace BrazilSharp {
-    
+namespace BrazilSharp
+{
+
     /// <summary>Set of static methods to validate brazilian's documents, like CPF, CNPJ, voter registration card, Driver License and others.</summary>
-    public static partial class Validate {
-      
+    public static partial class Validate
+    {
+
         /// <summary>Use this method to validate a CPF number.</summary>
         /// <param name="Expression">Enter a CPF to validate it.</param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is valid CPF. Otherwise, <see langword="false"/>.</returns>
-        public static bool CPF(object Expression) {
-            if(Expression == null)
+        public static bool CPF(object Expression)
+        {
+            if (Expression == null)
                 return false;
-            string scpf;
-            switch (Expression)
-            {
-                case char[] chArray:
-                    scpf = new String(chArray);
-                    break;
-                case string str:
-                    scpf = str;
-                    break;
-                case Array arr:
-                    scpf = String.Join("", arr);
-                    break;
-                default:
-                    scpf = Convert.ToString(Expression);
-                    break;
-            }
-            scpf = Regex.Replace(scpf, @"[^0-9]+", string.Empty);
-            if(scpf.Length == 0 || scpf.Length > 11)
+            string strCpf = ConvertObjToString(Expression);
+            strCpf = Utilities.TakeOnlyNumbers(strCpf);
+            if (strCpf.Length == 0 || strCpf.Length > 11)
                 return false;
-            while(scpf.Length < 11) 
-                scpf = scpf.Insert(0, "0");
-            int summation;
-            int[] CheckingDigit = new int[2], gotDigit = {Convert.ToInt32(scpf.Substring(9, 1)),Convert.ToInt32(scpf.Substring(10, 1))};
+            while (strCpf.Length < 11)
+                strCpf = strCpf.Insert(0, "0");
+            int summation = 0;
+            int[] checkingDigit = new int[2],
+                gotDigit = {
+                    Convert.ToInt32(strCpf.Substring(9, 1)),
+                    Convert.ToInt32(strCpf.Substring(10, 1))
+                };
+            for (int index = 0, weight = 10; index < strCpf.Length - 2; ++index, --weight)
+                summation += Convert.ToInt32(strCpf.Substring(index, 1)) * weight;
+            checkingDigit[0] = summation % 11;
+            checkingDigit[0] = checkingDigit[0] < 2 ? 0 : 11 - checkingDigit[0];
             summation = 0;
-            for (int index = 0, weight = 10; index < scpf.Length - 2; ++index, --weight) 
-                summation += Convert.ToInt32(scpf.Substring(index, 1)) * weight;
-            CheckingDigit[0] = summation % 11;
-            CheckingDigit[0] = CheckingDigit[0] < 2 ? 0 : 11 - CheckingDigit[0];
-            summation = 0;
-            for (int index = 0, weight = 11; index < scpf.Length - 1; ++index, --weight)
-                summation += Convert.ToInt32(scpf.Substring(index, 1)) * weight;
-            CheckingDigit[1] = summation % 11;
-            CheckingDigit[1] = CheckingDigit[1] < 2 ? 0 : 11 - CheckingDigit[1];
-            return !IsRepeated(scpf) && gotDigit.SequenceEqual(CheckingDigit);
+            for (int index = 0, weight = 11; index < strCpf.Length - 1; ++index, --weight)
+                summation += Convert.ToInt32(strCpf.Substring(index, 1)) * weight;
+            checkingDigit[1] = summation % 11;
+            checkingDigit[1] = checkingDigit[1] < 2 ? 0 : 11 - checkingDigit[1];
+            bool result = !Utilities.IsRepeated(strCpf);
+            result = result && gotDigit.SequenceEqual(checkingDigit);
+            return result;
         }
 
         /// <summary>Use this method to validate a CNPJ number.</summary>
         /// <param name="Expression">Enter a CNPJ to validate it.</param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is valid CNPJ document. Otherwise, <see langword="false"/>.</returns>
-        public static bool CNPJ(object Expression) {
+        public static bool CNPJ(object Expression)
+        {
             if (Expression == null)
                 return false;
-            string scnpj;
-            switch (Expression)
-            {
-                case char[] chArray:
-                    scnpj = new String(chArray);
-                    break;
-                case string str:
-                    scnpj = str;
-                    break;
-                case Array arr:
-                    scnpj = String.Join("", arr);
-                    break;
-                default:
-                    scnpj = Convert.ToString(Expression);
-                    break;
-            }
-            scnpj = Regex.Replace(scnpj, @"[^0-9]+", string.Empty);
-            if (scnpj.Length == 0 || scnpj.Length > 14)
+            string strCnpj = ConvertObjToString(Expression);
+            strCnpj = Utilities.TakeOnlyNumbers(strCnpj);
+            if (strCnpj.Length == 0 || strCnpj.Length > 14)
                 return false;
-            while (scnpj.Length < 14)
-                scnpj = scnpj.Insert(0, "0");
-            int summation, weight;
-            int[] CheckingDigit = new int[2];
+            while (strCnpj.Length < 14)
+                strCnpj = strCnpj.Insert(0, "0");
+            int summation = 0, weight = 2;
+            int[] checkingDigit = new int[2];
             // Verificando o primeiro DV || Checking First digit
-            summation = 0;
-            weight = 2;
-            for (int index = 11; index >= 0; --index) {
-                summation += Convert.ToInt32(scnpj.Substring(index, 1)) * weight;
+            for (int index = 11; index >= 0; --index)
+            {
+                summation += Convert.ToInt32(strCnpj.Substring(index, 1)) * weight;
                 weight = weight < 9 ? weight + 1 : 2;
             }
-            CheckingDigit[0] = summation % 11;
-            CheckingDigit[0] = CheckingDigit[0] >= 2 ? 11 - CheckingDigit[0] : 0;
+            checkingDigit[0] = summation % 11;
+            checkingDigit[0] = checkingDigit[0] >= 2 ? 11 - checkingDigit[0] : 0;
             // Verificando o segundo DV || Checking second digit:
             summation = 0;
             weight = 2;
-            for (int index = 12; index >= 0; --index) {
-                summation += Convert.ToInt32(scnpj.Substring(index, 1)) * weight;
+            for (int index = 12; index >= 0; --index)
+            {
+                summation += Convert.ToInt32(strCnpj.Substring(index, 1)) * weight;
                 weight = weight < 9 ? weight + 1 : 2;
             }
-            CheckingDigit[1] = summation % 11;
-            CheckingDigit[1] = CheckingDigit[1] >= 2 ? 11 - CheckingDigit[1] : 0;
-            return !IsRepeated(scnpj) && Convert.ToInt32(scnpj.Substring(12, 1)) == CheckingDigit[0] && Convert.ToInt32(scnpj.Substring(13, 1)) == CheckingDigit[1];
+            checkingDigit[1] = summation % 11;
+            checkingDigit[1] = checkingDigit[1] >= 2 ? 11 - checkingDigit[1] : 0;
+            bool result = !Utilities.IsRepeated(strCnpj);
+            result = result && Convert.ToInt32(strCnpj.Substring(12, 1)) == checkingDigit[0];
+            result = result && Convert.ToInt32(strCnpj.Substring(13, 1)) == checkingDigit[1];
+            return result;
         }
 
         /// <summary>Use this method to validates a national driver's license issued in any Brazilian state territory.</summary>
         /// <param name="Expression">Registry number of Driver License (PT-BR: Número de Registro da CNH) to validate</param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is a valid registry number of driver license. Otherwise, <see langword="false"/>.</returns>
-        public static bool DriverLicense(object Expression) {
-            if(Expression == null)
+        public static bool DriverLicense(object Expression)
+        {
+            if (Expression == null)
                 return false;
-            string sdl;
-            switch (Expression)
+            string strBrDriveLicense = ConvertObjToString(Expression);
+            strBrDriveLicense = Utilities.TakeOnlyNumbers(strBrDriveLicense);
+            if (strBrDriveLicense.Length == 0 || strBrDriveLicense.Length > 11)
+                return false;
+            while (strBrDriveLicense.Length < 11)
+                strBrDriveLicense = strBrDriveLicense.Insert(0, "0");
+            int[] summation = new[] { 0, 0 };
+            for (int index = 0, weightAsc = 1, weightDesc = 9; index < 9; ++index, --weightDesc, ++weightAsc)
             {
-                case char[] chArray:
-                    sdl = new String(chArray);
-                    break;
-                case string str:
-                    sdl = str;
-                    break;
-                case Array arr:
-                    sdl = String.Join("", arr);
-                    break;
-                default:
-                    sdl = Convert.ToString(Expression);
-                    break;
+                summation[0] += Convert.ToInt32(strBrDriveLicense.Substring(index, 1)) * weightDesc;
+                summation[1] += Convert.ToInt32(strBrDriveLicense.Substring(index, 1)) * weightAsc;
             }
-            sdl = Regex.Replace(sdl, @"[^0-9]+", string.Empty);
-            if(sdl.Length == 0 || sdl.Length > 11)
-                return false;
-            while(sdl.Length < 11) 
-                sdl = sdl.Insert(0, "0");
-            int[] summation,CheckingDigit;
-            summation = new int[] { 0, 0 };
-            for (int index = 0, weightAsc = 1, weightDesc = 9; index < 9; ++index, --weightDesc, ++weightAsc) {
-                summation[0] += Convert.ToInt32(sdl.Substring(index,1)) * weightDesc;
-                summation[1] += Convert.ToInt32(sdl.Substring(index,1)) * weightAsc;
-            }
-            CheckingDigit = new int[] { summation[0] % 11, summation[1] % 11 };
-            bool FirstChkDigitGreaterThanNine = CheckingDigit[0] > 9;
-            CheckingDigit[0] = CheckingDigit[0] <= 9 ? CheckingDigit[0] : 0;
-            if (FirstChkDigitGreaterThanNine) //Differential rule for the remainder of the division of 11 of the first check digit is greater than 9
-                CheckingDigit[1] = CheckingDigit[1] - 2 < 0 ? CheckingDigit[1] + 9 : CheckingDigit[1] - 2;
-            CheckingDigit[1] = CheckingDigit[1] <= 9 ? CheckingDigit[1] : 0; //Adjustment's end
-            return !IsRepeated(sdl) && Convert.ToInt32(sdl.Substring(9,1)) == CheckingDigit[0] && Convert.ToInt32(sdl.Substring(10,1)) == CheckingDigit[1];
+            int[] checkingDigit = new int[] { summation[0] % 11, summation[1] % 11 };
+            bool firstChkDigitIsGreaterThan9 = checkingDigit[0] > 9;
+            checkingDigit[0] = checkingDigit[0] <= 9 ? checkingDigit[0] : 0;
+            if (firstChkDigitIsGreaterThan9) //Differential rule for the remainder of the division of 11 of the first check digit is greater than 9
+                checkingDigit[1] = checkingDigit[1] - 2 < 0 ? checkingDigit[1] + 9 : checkingDigit[1] - 2;
+            checkingDigit[1] = checkingDigit[1] <= 9 ? checkingDigit[1] : 0; //Adjustment's end
+            bool result = !Utilities.IsRepeated(strBrDriveLicense);
+            result = result && Convert.ToInt32(strBrDriveLicense.Substring(9, 1)) == checkingDigit[0];
+            result = result && Convert.ToInt32(strBrDriveLicense.Substring(10, 1)) == checkingDigit[1];
+            return result;
         }
 
-        /// <summary>Validates any <see cref="String"/> and determinate it if is an valid e-mail address.</summary>
+        /// <summary>Validates any <see cref="object"/> and determinate it if is an valid e-mail address.</summary>
         /// <param name="Expression">An e-mail address to test</param>
         /// <returns>Returns <see langword="true"/> if email's <paramref name="Expression"/> is  valid. Otherwise, <see langword="false"/>.</returns>
         public static bool Email(object Expression)
         {
             string regex = @"^[-a-zA-Z0-9][-.a-zA-Z0-9]*@[-.a-zA-Z0-9]+(\.[-.a-zA-Z0-9]+)*\.(com|edu|info|gov|int|mil|net|org|biz|name|museum|online|coop|aero|pro|tv|[a-zA-Z]{2,3})$";
-            string data;switch (Expression)
-            {
-                case null:
-                    data = string.Empty;
-                    break;
-                case char[] chArray:
-                    data = new String(chArray);
-                    break;
-                case string str:
-                    data = str;
-                    break;
-                case Array arr:
-                    data = String.Join("", arr);
-                    break;
-                default:
-                    data = Convert.ToString(Expression);
-                    break;
-            }
-            bool result;
-            result = Regex.IsMatch(data, regex, RegexOptions.IgnoreCase);
+            string data = ConvertObjToString(Expression);
+            bool result = Regex.IsMatch(data, regex, RegexOptions.IgnoreCase);
             return result;
         }
-        
+
         /// <summary>Validates a State Registration number (PT-BR:Inscrição Estadual)</summary>
         /// <param name="Expression">State Registration to validate</param>
         /// <param name="state">A Brazilian State that <paramref name="Expression" /> belongs...</param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is a valid State Registration. Otherwise, <see langword="false"/>.</returns>
         /// <exception cref="StateNotFoundException"><paramref name="state"/> isn't valid value.</exception>
-        public static bool StateRegistration(object Expression, BrazilianStates state) {
+        public static bool StateRegistration(object Expression, BrazilianStates state)
+        {
             if (Expression == null)
                 return false;
-            BrazilianStates[] arrbs = (BrazilianStates[])Enum.GetValues(typeof(BrazilianStates));
-            if (state == BrazilianStates.ZZ || (int)state == 99 || !arrbs.Contains(state))
+            var arrBrStates = ((BrazilianStates[])Enum.GetValues(typeof(BrazilianStates))).Where(stt => stt != BrazilianStates.ZZ);
+            if (!arrBrStates.Contains(state))
                 throw new StateNotFoundException(ThrowHelper.GetMsgErrorStateRegistration());
-            string strExp;
-            switch (Expression)
-            {
-                case char[] chArray:
-                    strExp = new String(chArray);
-                    break;
-                case string str:
-                    strExp = str;
-                    break;
-                case Array arr:
-                    strExp = String.Join("", arr);
-                    break;
-                default:
-                    strExp = Convert.ToString(Expression);
-                    break;
-            }
+            string strExp = ConvertObjToString(Expression);
             bool result = strExp.Length > 0;
-            result = result && !IsRepeated(strExp);
+            result = result && !Utilities.IsRepeated(strExp);
             result = result && Convert.ToBoolean(
-                
-                typeof(_InternalMethodsValidateIE)
-                .GetTypeInfo()
-                .GetMethod(
-                    "ValidateIE_" + 
-                    Enum.GetName(typeof(BrazilianStates), state)
-                )
-                .Invoke(
-                    null, 
-                    new string[] { strExp }
-                )
+                typeof(InternalMethodsValidateIE)
+                .GetTypeInfo()?
+                .GetMethod("ValidateIE_" + Enum.GetName(typeof(BrazilianStates), state))?
+                .Invoke(null, new object[] { strExp })
             );
             return result;
         }
@@ -228,19 +161,19 @@ namespace BrazilSharp {
             switch (Expression)
             {
                 case char[] chArray:
-                    result = DateTime.TryParse(new String(chArray), out _);
-                    result = result || TimeSpan.TryParse(new String(chArray), out _);
+                    result = DateTime.TryParse(new string(chArray), out _);
+                    result = result || TimeSpan.TryParse(new string(chArray), out _);
                     break;
                 case Array arr:
-                    result = DateTime.TryParse(String.Join("", arr), out _);
-                    result = result || TimeSpan.TryParse(String.Join("", arr), out _);
+                    result = DateTime.TryParse(string.Join("", arr), out _);
+                    result = result || TimeSpan.TryParse(string.Join("", arr), out _);
                     break;
                 case string str:
                     result = DateTime.TryParse(str, out _);
                     result = result || TimeSpan.TryParse(str, out _);
                     break;
-                case DateTime dt:
-                case TimeSpan ts:
+                case DateTime _:
+                case TimeSpan _:
                     result = true;
                     break;
                 default:
@@ -253,175 +186,201 @@ namespace BrazilSharp {
         /// <summary>Test any expression or object and determinate it if is a valid Brazilian Voter Title (Known as "Título de Eleitor" in PT-BR).</summary>
         /// <param name="Expression">Voter Title's number to validate it</param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is valid Voter Title document. Otherwise, <see langword="false"/>.</returns>
-        public static bool VoterTitle(object Expression) {
-            string svt ;
-            switch (Expression)
-            {
-                case null:
-                    svt = string.Empty;
-                    break;
-                case char[] chArray:
-                    svt = new String(chArray);
-                    break;
-                case string str:
-                    svt = str;
-                    break;
-                case Array arr:
-                    svt = String.Join("", arr);
-                    break;
-                default:
-                    svt = Convert.ToString(Expression);
-                    break;
-            }
-            svt = Regex.Replace(svt, @"[^0-9]+", string.Empty);
-            if(svt.Length == 0 || svt.Length > 12)
+        public static bool VoterTitle(object Expression)
+        {
+            string strVoterTitle = ConvertObjToString(Expression);
+            strVoterTitle = Utilities.TakeOnlyNumbers(strVoterTitle);
+            if (strVoterTitle.Length == 0 || strVoterTitle.Length > 12)
                 return false;
-            while(svt.Length < 12)
-                svt = svt.Insert(0, "0");
-            int[] CheckingDigit = new int[2], gotDigit={Convert.ToInt32(svt.Substring(10, 1)),Convert.ToInt32(svt.Substring(11,1))};
+            while (strVoterTitle.Length < 12)
+                strVoterTitle = strVoterTitle.Insert(0, "0");
+            int[] checkingDigit = new int[2],
+            gotDigit = {
+                Convert.ToInt32(strVoterTitle.Substring(10, 1)),
+                Convert.ToInt32(strVoterTitle.Substring(11, 1))
+            };
             int summation = 0;
-            short stateCode = Convert.ToInt16(svt.Substring(8, 2));
+            short stateCode = Convert.ToInt16(strVoterTitle.Substring(8, 2));
             for (int index = 0, weight = 2; index < 8; ++index, ++weight)
-                summation += weight * Convert.ToInt32(svt.Substring(index,1));
-            CheckingDigit[0] = summation % 11;
-            CheckingDigit[0] = CheckingDigit[0] > 9 ? 0 : CheckingDigit[0];
+                summation += weight * Convert.ToInt32(strVoterTitle.Substring(index, 1));
+            checkingDigit[0] = summation % 11;
+            checkingDigit[0] = checkingDigit[0] > 9 ? 0 : checkingDigit[0];
             summation = 0;
             for (int index = 8, weight = 7; index < 11; ++index, ++weight)
-                summation += weight * Convert.ToInt32(svt.Substring(index,1));
-            CheckingDigit[1] = summation % 11;
-            CheckingDigit[1] = CheckingDigit[1] > 9 ? 0 : CheckingDigit[1];
-            return gotDigit.SequenceEqual(CheckingDigit) &&
+                summation += weight * Convert.ToInt32(strVoterTitle.Substring(index, 1));
+            checkingDigit[1] = summation % 11;
+            checkingDigit[1] = checkingDigit[1] > 9 ? 0 : checkingDigit[1];
+            bool result = gotDigit.SequenceEqual(checkingDigit) &&
                     Utilities.TREBrazilianStatesCode.Values.Contains(stateCode);
+            return result;
         }
 
         /// <summary>Test any expression and tests it if an Brazilian's PIS number valid. This Method can validate PASEP too. (PT-BR: PIS => Programa de Integração Social / PASEP => Programa de Formação do Patrimônio do Servidor Público).</summary>
         /// <param name="Expression"></param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is a valid Brazilian's PIS number.</returns>
-        public static bool PIS(object Expression) {
-            string spis;
-            switch (Expression)
-            {
-                case null:
-                    spis = string.Empty;
-                    break;
-                case char[] chArray:
-                    spis = new String(chArray);
-                    break;
-                case string str:
-                    spis = str;
-                    break;
-                case Array arr:
-                    spis = String.Join("", arr);
-                    break;
-                default:
-                    spis = Convert.ToString(Expression);
-                    break;
-            }
-            spis = Regex.Replace(spis, @"[^0-9]+", string.Empty);
-            if(spis.Length == 0 || spis.Length > 11)
+        public static bool PIS(object Expression)
+        {
+            string strPis = ConvertObjToString(Expression);
+            strPis = Utilities.TakeOnlyNumbers(strPis);
+            if (strPis.Length == 0 || strPis.Length > 11)
                 return false;
-            while(spis.Length < 11)
-                spis = spis.Insert(0, "0");
+            while (strPis.Length < 11)
+                strPis = strPis.Insert(0, "0");
             int summation = 0;
-            for(int index = 9, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
-                summation += weight * Convert.ToInt32(spis.Substring(index, 1));
-            int CheckingDigit = summation % 11;
-            CheckingDigit = 11 - CheckingDigit;
-            CheckingDigit = CheckingDigit > 9 ? 0 : CheckingDigit;
-            return Convert.ToInt32(spis.Substring(10, 1)) == CheckingDigit;
+            for (int index = 9, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
+                summation += weight * Convert.ToInt32(strPis.Substring(index, 1));
+            int checkingDigit = summation % 11;
+            checkingDigit = 11 - checkingDigit;
+            checkingDigit = checkingDigit > 9 ? 0 : checkingDigit;
+            return Convert.ToInt32(strPis.Substring(10, 1)) == checkingDigit;
         }
 
         /// <summary>Test any expression and tests it if an Brazilian's RENAVAM's Car number valid.</summary>
         /// <param name="Expression"></param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is a valid Brazilian's RENAVAM number.</returns>
-        public static bool Renavam(object Expression) {
-            string srenavam;
-            switch (Expression)
-            {
-                case null:
-                    srenavam = string.Empty;
-                    break;
-                case char[] chArray:
-                    srenavam = new String(chArray);
-                    break;
-                case string str:
-                    srenavam = str;
-                    break;
-                case Array arr:
-                    srenavam = String.Join("", arr);
-                    break;
-                default:
-                    srenavam = Convert.ToString(Expression);
-                    break;
-            }
-            srenavam = Regex.Replace(srenavam, @"[^0-9]+", string.Empty);
-            if(srenavam.Length == 0 || srenavam.Length > 11)
+        public static bool Renavam(object Expression)
+        {
+            string strRenavam = ConvertObjToString(Expression);
+            strRenavam = Utilities.TakeOnlyNumbers(strRenavam);
+            if (strRenavam.Length == 0 || strRenavam.Length > 11)
                 return false;
             int summation = 0;
-            for(int index = 9, weight = 2; index >= 0; --index, weight= weight < 9 ? weight + 1 : 2)
-                summation += weight * Convert.ToInt32(srenavam.Substring(index, 1));
-            int CheckingDigit = summation % 11;
-            CheckingDigit = 11 - CheckingDigit;
-            CheckingDigit = CheckingDigit > 9 ? 0 : CheckingDigit;
-            return Convert.ToInt32(srenavam.Substring(10, 1)) == CheckingDigit;
+            for (int index = 9, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
+                summation += weight * Convert.ToInt32(strRenavam.Substring(index, 1));
+            int checkingDigit = summation % 11;
+            checkingDigit = 11 - checkingDigit;
+            checkingDigit = checkingDigit > 9 ? 0 : checkingDigit;
+            bool result = Convert.ToInt32(strRenavam.Substring(10, 1)) == checkingDigit;
+            return result;
         }
 
-        /// <summary>Validates a Credit card number...</summary>
-        /// <param name="Expression">Number of credit card</param>
-        /// <param name="dueDate">A due date of credit card</param>
+        /// <summary>Validates a Credit card number issued in Brazil.</summary>
+        /// <param name="expression">Number of credit card</param>
         /// <param name="cvc">The security code in the back of card (some cases, in front).</param>
         /// <returns>If the data in parameters is correctly, returns <see langword="true"/>. Otherwise, <see langword="false"/>.</returns>
-        [Obsolete("This method will be available in the future!")]
-        private static bool CreditCard(object Expression, DateTime dueDate, short cvc) {
+        public static bool CreditCard(object expression, short cvc)
+        {
+            // TODO: Add Validation for ELO card
+            string strCC = ConvertObjToString(expression);
+            strCC = Utilities.TakeOnlyNumbers(strCC);
+            if(strCC.Length == 0 || Utilities.IsRepeated(strCC))
+                return false;
+            var rxCC = new Dictionary<string,(string fullFlag, string rxPattern)>()
+            {
+                {"mc",("MasterCard",@"^5[1-5][0-9]{14}$|^2(?:2(?:2[1-9]|[3-9][0-9])|[3-6][0-9][0-9]|7(?:[01][0-9]|20))[0-9]{12}$")},
+                {"amex",("American Express", @"^3[47][0-9]{13}$/")},
+                {"visa",("Visa", @"^4[0-9]{12}(?:[0-9]{3})?$")},
+                {"discover",("Discover", @"^65[4-9][0-9]{13}|64[4-9][0-9]{13}|6011[0-9]{12}|(622(?:12[6-9]|1[3-9][0-9]|[2-8][0-9][0-9]|9[01][0-9]|92[0-5])[0-9]{10})$")},
+                {"jcb",("JCB", @"^(?:2131|1800|35[0-9]{3})[0-9]{11}$")},
+                {"dc",("Dinners Club", @"^3(?:0[0-5]|[68][0-9])[0-9]{11}$")},
+            };
+            string gotCardFlag = "ukn";
+            foreach (var rx in rxCC)
+            {
+                var ( _ , pattern ) = rx.Value;
+                if (Regex.IsMatch(strCC, pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline))
+                    gotCardFlag = rx.Key;
+            }
+            bool defaultCvcConditional = cvc >= 0 && cvc <= 999;
+            bool[] checkingConditionalCards = new[] {
+                // MasterCard, Visa and Discover is default: 16 digits number on its credit card and 3 digits cvc
+                (new[] {"mc", "visa", "discover"}).Contains(gotCardFlag) && strCC.Length == 16 && defaultCvcConditional,
+                // JCB can have 15 or 16 digits number on its credit card.
+                gotCardFlag == "jcb" && (new[]{15,16}).Contains(strCC.Length) && defaultCvcConditional,
+                // Amex has 4 digit CVC and 15 digits number on its credit card
+                gotCardFlag == "amex" && strCC.Length == 15 && cvc >= 0 && cvc <= 9999,
+                // Dinners Club has 14 digits number on its credit card.
+                gotCardFlag == "dc" && strCC.Length == 14 && defaultCvcConditional
+            };
+            // "False" is sure to be obtained. 
+            // If don't have any "True" result, it means that credit card number entered hasn't the regex pattern on "rxCC" variable.
+            if(!checkingConditionalCards.Contains(true))
+                return false;
+
+            int summation = Convert.ToInt32(strCC.Substring(strCC.Length - 1, 1));
+            int parity = strCC.Length - 1;
+            parity %= 2;
+            for (int position = 0; position < (strCC.Length - 1); ++position)
+            {
+                int currentDigitComputed = Convert.ToInt32(strCC.Substring(position, 1));
+                currentDigitComputed *= ((position % 2) == parity) ? 2 : 1;
+                currentDigitComputed -= currentDigitComputed > 9 ? 9 : 0;
+                summation += currentDigitComputed;
+            }
+            bool result = (summation % 10) == 0;
+            return result;
+
             throw new NotImplementedException("This method will be available in the future.");
-            // string svt = Expression switch {
-            //     null => string.Empty,
-            //     char[] chArray => new String(chArray),
-            //     Array arr => String.Join("",arr),
-            //     _ => Convert.ToString(Expression)
-            // };            
-            // return false;
         }
 
         /// <summary>Validates any expression from any object, to detect if its value is a numeric expression.</summary>
         /// <param name="Expression">An expression to validate it</param>
         /// <returns>Returns <see langword="true"/> if <paramref name="Expression"/> is valid numeric (Can be Hex, Octal, decimal, integer or binary).</returns>
-        public static bool Numeric(object Expression) {
-            string str;
+        public static bool Numeric(object Expression)
+        {
+            string strNum;
             bool result;
-            switch (Expression) {
-                case null: 
-                    result = false; 
+            switch (Expression)
+            {
+                case null:
+                    result = false;
                     break;
-                case string strE:
-                    str = strE;
+                case string str:
+                    strNum = str;
                 Label1:
-                    try {
+                    try
+                    {
                         // Checking if is Binaries number...
-                        if (Regex.IsMatch(str, @"^(&B|0B)?[0-1]+(&|L|U|UL)?$",RegexOptions.IgnoreCase)) 
-                            _ = Convert.ToInt64(Regex.Replace(str, @"[^0-1]", string.Empty), 2);
+                        if (Regex.IsMatch(strNum, @"^(&B|0B)?[0-1]+(&|L|U|UL)?$", RegexOptions.IgnoreCase))
+                        {
+                            string strBin = strNum;
+                            if(strNum.StartsWith("0b") || strNum.StartsWith("0B"))
+                                strBin = strNum.Substring(2);
+                            strBin = Utilities.TakeOnlyNumbers(strBin);
+                            _ = Convert.ToInt64(strBin, 2);
+                            result = true;
+                        }
                         // Checking if is Visual Basic's Octal Number
-                        else if (Regex.IsMatch(str, @"^(&O)?[0-7]+(&|L|U|UL)?$",RegexOptions.IgnoreCase)) 
-                            _ = Convert.ToInt64(Regex.Replace(str, @"[^0-7]+", string.Empty), 8);
+                        else if (Regex.IsMatch(strNum, @"^(&O)?[0-7]+(&|L|U|UL)?$", RegexOptions.IgnoreCase))
+                        {
+                            string strOctNum = strNum;
+                            if(strNum.StartsWith("&o") || strNum.StartsWith("&O"))
+                                strOctNum = strNum.Substring(2);
+                            strOctNum = Utilities.TakeOnlyNumbers(strOctNum);
+                            _ = Convert.ToInt64(strOctNum, 8);
+                            result = true;
+                        }
                         // Checking if is Integer or Regular Numbers
-                        else if (Regex.IsMatch(str, @"^[0-9]+$")) 
-                            _ = Convert.ToInt64(str, 10);
+                        else if (Regex.IsMatch(strNum, @"^[0-9]+$"))
+                            result = long.TryParse(strNum, out _);
                         // Checking if is a Hex numbers (From many different languages)
-                        else if (Regex.IsMatch(str, @"^(&H|0x|\#|\$)?[0-9a-fA-F]+(&|L|U|UL)?$",RegexOptions.IgnoreCase)) 
-                            _ = Convert.ToInt64(Regex.Replace(str, @"[^0-9a-fA-F]+", string.Empty), 16);
+                        else if (Regex.IsMatch(strNum, @"^(&H|0x|\#|\$)?[0-9a-fA-F]+(&|L|U|UL)?$", RegexOptions.IgnoreCase))
+                        {
+                            string strHexNum = strNum;
+                            bool startsWithHexId = strNum.StartsWith("0x") || strNum.StartsWith("0X");
+                            startsWithHexId = startsWithHexId || strNum.StartsWith("&h") || strNum.StartsWith("&H");
+                            if(startsWithHexId)
+                                strHexNum = strNum.Substring(2);
+                            startsWithHexId = strNum.StartsWith("#") || strNum.StartsWith("$");
+                            if(startsWithHexId)
+                                strHexNum = strNum.Substring(1);
+                            strHexNum = Regex.Replace(strHexNum, @"[^0-9a-fA-F]+", string.Empty);
+                            result = long.TryParse(strHexNum, out _);
+                        }
                         // If isn't a integer number, then is an decimal number
                         else
-                            _ = Convert.ToDouble(str);
-                        result = true;
+                            result = double.TryParse(strNum, NumberStyles.Any, CultureInfo.CurrentCulture, out _);
                     }
+                    catch (StackOverflowException) { throw; }
+                    catch (ThreadAbortException) { throw; }
                     catch (OutOfMemoryException) { throw; }
                     catch { result = false; }
                     break;
                 case char[] chArray:
-                    str = new string(chArray);
+                    strNum = new string(chArray);
                     goto Label1;
                 case Array arr:
-                    str = String.Join("", arr);
+                    strNum = string.Join("", arr);
                     goto Label1;
                 default:
                     switch (Type.GetTypeCode(Expression.GetType()))
@@ -449,15 +408,23 @@ namespace BrazilSharp {
                     break;
             }
             return result;
-        }        
-
-        private static bool IsRepeated(string str)
+        }
+    
+        private static string ConvertObjToString(object obj)
         {
-            int summation = 1;
-            for(int current = 1; current < str.Length; ++current)
-                if(str[current] == str[0])
-                    ++summation;
-            return summation == str.Length;
+            switch (obj)
+            {
+                case null:
+                    return string.Empty;
+                case char[] chArray:
+                    return new string(chArray);
+                case string str:
+                    return str;
+                case Array arr:
+                    return string.Join("", arr);
+                default:
+                    return Convert.ToString(obj);
+            }
         }
     }
 }

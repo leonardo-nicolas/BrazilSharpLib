@@ -7,7 +7,7 @@ namespace BrazilSharp
 {
     public static partial class Validate
     {
-        private static class _InternalMethodsValidateIE
+        private static class InternalMethodsValidateIE
         {
             /*
              * Instructions in http://www.sintegra.gov.br/insc_est.html 
@@ -20,48 +20,53 @@ namespace BrazilSharp
             public static bool ValidateIE_AC(string IE)
             {
                 // Acre
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 13)
                     return false;
                 while (IE.Length < 13)
                     IE = IE.Insert(0, "0");
-                int summation;
-                summation = 0;
+                int summation = 0;
                 for (int index = 10, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
                 int remainder = summation % 11;
-                int[] CheckingDigit = new int[2];
-                CheckingDigit[0] = (11 - remainder >= 10) ? 0 : 11 - remainder;
+                int[] checkingDigit = new int[2];
+                checkingDigit[0] = (11 - remainder >= 10) ? 0 : 11 - remainder;
                 summation = 0;
                 for (int index = 11, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
                 remainder = summation % 11;
-                CheckingDigit[1] = (11 - remainder >= 10) ? 0 : 11 - remainder;
-                return CheckingDigit[0] >= 0 ? CheckingDigit[0] == Convert.ToInt32(IE.Substring(11, 1)) && CheckingDigit[1] == Convert.ToInt32(IE.Substring(12, 1)) : false;
+                checkingDigit[1] = (11 - remainder >= 10) ? 0 : 11 - remainder;
+                bool result = checkingDigit[0] >= 0;
+                result = result && !Utilities.IsRepeated(IE);
+                result = result && checkingDigit[0] == Convert.ToInt32(IE.Substring(11, 1));
+                result = result && checkingDigit[1] == Convert.ToInt32(IE.Substring(12, 1));
+                return result;
             }
 
             public static bool ValidateIE_AL(string IE)
             {
                 //Alagoas
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length != 9)
                     return false;
                 if (IE.Substring(0, 2) != "24")
                     return false;
-                if (!(new char[] { '0', '3', '5', '7', '8' }).Contains(IE[2]))
+                if (!(new[] { '0', '3', '5', '7', '8' }).Contains(IE[2]))
                     return false;
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation * 10;
-                CheckingDigit = CheckingDigit - (Convert.ToInt32(CheckingDigit / 11D) * 11);
-                return CheckingDigit == Convert.ToInt32(IE.Substring(8, 1));
+                int checkingDigit = summation * 10;
+                checkingDigit -= Convert.ToInt32(checkingDigit / 11D) * 11;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && checkingDigit == Convert.ToInt32(IE.Substring(8, 1));
+                return result;
             }
 
             public static bool ValidateIE_AP(string IE)
             {
                 //Amapá
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length != 9)
                     return false;
                 if (IE.Substring(0, 2) != "03")
@@ -84,15 +89,20 @@ namespace BrazilSharp
                 }
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit;
-                return !(CheckingDigit != Convert.ToInt32(IE.Substring(8, 1)) || (CheckingDigit == 10 && IE[8] != '0') || (CheckingDigit == 11 && Convert.ToInt32(IE.Substring(8, 1)) != d));
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit;
+                
+                bool result = checkingDigit != Convert.ToInt32(IE.Substring(8, 1));
+                result = result || (checkingDigit == 10 && IE[8] != '0');
+                result = result || (checkingDigit == 11 && Convert.ToInt32(IE.Substring(8, 1)) != d);
+                result = !Utilities.IsRepeated(IE) && !result;
+                return result;
             }
 
             public static bool ValidateIE_AM(string IE)
             {
                 //Amazonas
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -100,43 +110,48 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
+                bool result;
                 if (summation < 11)
-                    return Convert.ToInt32(IE.Substring(8, 1)) == (11 - summation);
+                    result = Convert.ToInt32(IE.Substring(8, 1)) == (11 - summation);
                 else
                 {
-                    int CheckingDigit = summation % 11;
-                    CheckingDigit = CheckingDigit >= 2 ? 11 - CheckingDigit : 0;
-                    return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                    int checkingDigit = summation % 11;
+                    checkingDigit = checkingDigit >= 2 ? 11 - checkingDigit : 0;
+                    result = Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
                 }
+                result = !Utilities.IsRepeated(IE) && result;
+                return result;
             }
 
             public static bool ValidateIE_BA(string IE)
             {
                 //Bahia
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
-                int summation, divider, weight, current;
-                int[] CheckingDigit = new int[2], GotDigits = { Convert.ToInt32(IE.Substring(IE.Length - 2, 1)), Convert.ToInt32(IE.Substring(IE.Length - 1, 1)) };                
+                IE = Utilities.TakeOnlyNumbers(IE);
+                int divider, current;
+                int[] checkingDigit = new int[2], gotDigits = {
+                    Convert.ToInt32(IE.Substring(IE.Length - 2, 1)), 
+                    Convert.ToInt32(IE.Substring(IE.Length - 1, 1)) 
+                };
                 if(!(new[]{ 8, 9 }).Contains(IE.Length))
                     return false;
-                int SecondDigit = Convert.ToInt32(IE.Substring(1, 1));
-                if((new[]{0,1,2,3,4,5,8}).Contains(SecondDigit))
+                int secondDigit = Convert.ToInt32(IE.Substring(1, 1));
+                if((new[]{0,1,2,3,4,5,8}).Contains(secondDigit))
                     divider = 10;
-                else if ((new[]{6,7,9}).Contains(SecondDigit))
+                else if ((new[]{6,7,9}).Contains(secondDigit))
                     divider = 11;
                 else // Useless else context, but necessary!
                     divider = 1;
 
                 //Second Digit
-                summation = 0;
-                weight = IE.Length-1;
+                int summation = 0,weight = IE.Length-1;
                 for (int index = 0; index < IE.Length - 2; ++index)
                 {
                     current = Convert.ToInt32(IE.Substring(index, 1));
                     summation += weight * current;
                     --weight;
                 }
-                CheckingDigit[1] = summation % divider;
-                CheckingDigit[1] = CheckingDigit[1] == 0 ? 0 : divider - CheckingDigit[1];
+                checkingDigit[1] = summation % divider;
+                checkingDigit[1] = checkingDigit[1] == 0 ? 0 : divider - checkingDigit[1];
                 
                 //First Digit
                 summation = 0;
@@ -149,18 +164,18 @@ namespace BrazilSharp
                 }
                 current = Convert.ToInt32(IE.Substring(IE.Length-1, 1));
                 summation += weight * current;
-                CheckingDigit[0] = summation % divider;
-                CheckingDigit[0] = CheckingDigit[0] == 0 ? 0 : divider - CheckingDigit[0];
+                checkingDigit[0] = summation % divider;
+                checkingDigit[0] = checkingDigit[0] == 0 ? 0 : divider - checkingDigit[0];
 
-                bool result = GotDigits.SequenceEqual(CheckingDigit);
-                
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && gotDigits.SequenceEqual(checkingDigit);
                 return result;
             }
 
             public static bool ValidateIE_CE(string IE)
             {
                 // Ceará
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -168,16 +183,18 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit;
-                CheckingDigit = CheckingDigit > 9 ? 0 : CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit;
+                checkingDigit = checkingDigit > 9 ? 0 : checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_DF(string IE)
             {
                 // Federal District / Distrito Federal
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 13)
                     return false;
                 while (IE.Length < 13)
@@ -185,21 +202,24 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 10, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int[] CheckingDigit = new int[2];
-                CheckingDigit[0] = summation % 11;
-                CheckingDigit[0] = (11 - CheckingDigit[0]) >= 10 ? 0 : 11 - CheckingDigit[0];
+                int[] checkingDigit = new int[2];
+                checkingDigit[0] = summation % 11;
+                checkingDigit[0] = (11 - checkingDigit[0]) >= 10 ? 0 : 11 - checkingDigit[0];
                 summation = 0;
                 for (int index = 11, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                CheckingDigit[1] = summation % 11;
-                CheckingDigit[1] = (11 - CheckingDigit[1]) >= 10 ? 0 : 11 - CheckingDigit[1];
-                return CheckingDigit[0] == Convert.ToInt32(IE.Substring(11, 1)) && CheckingDigit[1] == Convert.ToInt32(IE.Substring(12, 1));
+                checkingDigit[1] = summation % 11;
+                checkingDigit[1] = (11 - checkingDigit[1]) >= 10 ? 0 : 11 - checkingDigit[1];
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(11, 1)) == checkingDigit[0];
+                result = result && Convert.ToInt32(IE.Substring(12, 1)) == checkingDigit[1];
+                return result;
             }
 
             public static bool ValidateIE_ES(string IE)
             {
                 //Espírito Santo
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -207,53 +227,58 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit < 2 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit < 2 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_GO(string IE)
             {
                 //Goiás
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if(IE.Length != 9)
                     return false;
                 if (!(new[] { "10", "11", "15" }).Contains(IE.Substring(0, 2)))
-                    if (IE.Substring(0, 8) == "11094402")
+                    if (string.Equals(IE.Substring(0, 8), "11094402", StringComparison.Ordinal))
                         return (new[] { "0", "1" }).Contains(IE.Substring(8, 1));
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
+                int checkingDigit = summation % 11;
                 
-                if (CheckingDigit == 0 || (CheckingDigit == 1 && !(Convert.ToInt32(IE.Substring(0, 8)) >= 10103105 && Convert.ToInt32(IE.Substring(0, 8)) <= 10119997)))
-                    CheckingDigit = 0;
-                else if (CheckingDigit == 1 && (Convert.ToInt32(IE.Substring(0, 8)) >= 10103105 && Convert.ToInt32(IE.Substring(0, 8)) <= 10119997))
-                    CheckingDigit = 1;
+                if (checkingDigit == 0 || (checkingDigit == 1 && !(Convert.ToInt32(IE.Substring(0, 8)) >= 10103105 && Convert.ToInt32(IE.Substring(0, 8)) <= 10119997)))
+                    checkingDigit = 0;
+                else if (checkingDigit == 1 && (Convert.ToInt32(IE.Substring(0, 8)) >= 10103105 && Convert.ToInt32(IE.Substring(0, 8)) <= 10119997))
+                    checkingDigit = 1;
                 else
-                    CheckingDigit = 11 - CheckingDigit;
-                
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                    checkingDigit = 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_MA(string IE)
             {
                 //Maranhão
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
-                if (IE.Length != 9 || IE.Substring(0, 2) != "12")
+                IE = Utilities.TakeOnlyNumbers(IE);
+                if (IE.Length != 9 || !string.Equals(IE.Substring(0, 2), "12", StringComparison.Ordinal))
                     return false;
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = (new[] { 0, 1 }).Contains(CheckingDigit) ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = (new[] { 0, 1 }).Contains(checkingDigit) ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_MT(string IE)
             {
                 //Mato Grosso
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 11)
                     return false;
                 while (IE.Length < 11)
@@ -261,34 +286,41 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 9, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = CheckingDigit == 0 || CheckingDigit == 1 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(10, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = checkingDigit == 0 || checkingDigit == 1 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(10, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_MS(string IE)
             {
                 //Mato Grosso do Sul
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length != 9 || IE.Substring(0, 2) != "28")
                     return false;
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                if (CheckingDigit == 0)
-                    CheckingDigit = 0;
-                else if (CheckingDigit < 0)
-                    return false;
+                int checkingDigit = summation % 11;
+                bool result = !Utilities.IsRepeated(IE);
+                if (checkingDigit == 0)
+                    result = result && Convert.ToInt32(IE.Substring(8, 1)) == 0;
+                else if (checkingDigit < 0)
+                    result = false;
                 else
-                    CheckingDigit = (11 - CheckingDigit > 9) ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                {
+                    checkingDigit = (11 - checkingDigit > 9) ? 0 : 11 - checkingDigit;
+                    result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                }
+
+                return result;
             }
 
             public static bool ValidateIE_MG(string IE)
             {
                 //Minas Gerais
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 13 || !IsCityValid(Convert.ToInt32(IE.Substring(0, 3)), "31"))
                     return false;
                 while (IE.Length < 13)
@@ -301,40 +333,45 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int indexB = 0; indexB < strCalculated.Length; ++indexB)
                     summation += Convert.ToInt32(strCalculated.Substring(indexB, 1));
-                int[] CheckingDigit = new int[2];
+                int[] checkingDigit = new int[2];
                 for (int weightX = 0; weightX < 100; weightX += 10)
                     if (summation >= weightX && summation < (weightX + 10))
                     {
-                        CheckingDigit[0] = weightX + 10 - summation;
+                        checkingDigit[0] = weightX + 10 - summation;
                         break;
                     }
                 IE = IE.Remove(3, 1);
                 summation = 0;
                 for (int indexC = 11, weight = 2; indexC >= 0; indexC--, weight = weight < 11 ? weight + 1 : 2)
                     summation += Convert.ToInt32(IE.Substring(indexC, 1)) * weight;
-                CheckingDigit[1] = summation % 11;
-                CheckingDigit[1] = CheckingDigit[1] < 2 ? 0 : 11 - CheckingDigit[1];
-                return CheckingDigit[0] == Convert.ToInt32(IE.Substring(11, 1)) && CheckingDigit[1] == Convert.ToInt32(IE.Substring(12, 1));
+                checkingDigit[1] = summation % 11;
+                checkingDigit[1] = checkingDigit[1] < 2 ? 0 : 11 - checkingDigit[1];
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && checkingDigit[0] == Convert.ToInt32(IE.Substring(11, 1));
+                result = result && checkingDigit[1] == Convert.ToInt32(IE.Substring(12, 1));
+                return result;
             }
 
             public static bool ValidateIE_PA(string IE)
             {
                 //Pará
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length != 9 || !IE.StartsWith("15"))
                     return false;
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = CheckingDigit < 2 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = checkingDigit < 2 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_PB(string IE)
             {
                 //Paraíba
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -342,43 +379,46 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit > 9 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit > 9 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_PR(string IE)
             {
                 //Paraná
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 10)
                     return false;
                 while (IE.Length < 10)
                     IE = IE.Insert(0, "0");
-                int summation;
-                int[] CheckingDigit = new int[2], gotDigit = { Convert.ToInt32(IE.Substring(8, 1)), Convert.ToInt32(IE.Substring(9, 1)) };
-                summation = 0;
+                int[] checkingDigit = new int[2], gotDigit = { Convert.ToInt32(IE.Substring(8, 1)), Convert.ToInt32(IE.Substring(9, 1)) };
+                int summation = 0;
                 for (int index = 7, weight = 2; index >= 0; --index, weight = weight < 7 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                CheckingDigit[0] = summation % 11;
-                CheckingDigit[0] = 11 - CheckingDigit[0];
-                CheckingDigit[0] = CheckingDigit[0] > 9 ? 0 : CheckingDigit[0];
+                checkingDigit[0] = summation % 11;
+                checkingDigit[0] = 11 - checkingDigit[0];
+                checkingDigit[0] = checkingDigit[0] > 9 ? 0 : checkingDigit[0];
                 summation = 0;
                 for (int index = 8, weight = 2; index >= 0; --index, weight = weight < 7 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                CheckingDigit[1] = summation % 11;
-                CheckingDigit[1] = 11 - CheckingDigit[1];
-                CheckingDigit[1] = CheckingDigit[1] > 9 ? 0 : CheckingDigit[1];
-                return CheckingDigit.SequenceEqual(gotDigit);
+                checkingDigit[1] = summation % 11;
+                checkingDigit[1] = 11 - checkingDigit[1];
+                checkingDigit[1] = checkingDigit[1] > 9 ? 0 : checkingDigit[1];
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && checkingDigit.SequenceEqual(gotDigit);
+                return result;
             }
 
             public static bool ValidateIE_PE(string IE)
             {
                 //Pernambuco                    
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
-                bool result;
+                IE = Utilities.TakeOnlyNumbers(IE);
+                bool result = !Utilities.IsRepeated(IE);
                 int summation;
-                int[] CheckingDigit;
+                int[] checkingDigit;
                 if (IE.Length <= 9) // e-Fisco
                 { 
                     while (IE.Length < 9)
@@ -386,15 +426,16 @@ namespace BrazilSharp
                     summation = 0;
                     for (int index = 0, weight = 8; index < 7; ++index, --weight)
                         summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                    CheckingDigit = new int[2];
-                    CheckingDigit[0] = summation % 11;
-                    CheckingDigit[0] = CheckingDigit[0] < 2 ? 0 : 11 - CheckingDigit[0];
+                    checkingDigit = new int[2];
+                    checkingDigit[0] = summation % 11;
+                    checkingDigit[0] = checkingDigit[0] < 2 ? 0 : 11 - checkingDigit[0];
                     summation = 0;
                     for (int index = 0, weight = 9; index < 8; ++index, --weight)
                         summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                    CheckingDigit[1] = summation % 11;
-                    CheckingDigit[1] = CheckingDigit[1] < 2 ? 0 : 11 - CheckingDigit[1];
-                    result = CheckingDigit[0] == Convert.ToInt32(IE.Substring(7, 1)) && CheckingDigit[1] == Convert.ToInt32(IE.Substring(8, 1));
+                    checkingDigit[1] = summation % 11;
+                    checkingDigit[1] = checkingDigit[1] < 2 ? 0 : 11 - checkingDigit[1];
+                    result = result && checkingDigit[0] == Convert.ToInt32(IE.Substring(7, 1));
+                    result = result && checkingDigit[1] == Convert.ToInt32(IE.Substring(8, 1));
                 }
                 else if (IE.Length > 9 && IE.Length <= 14) //Older
                 { 
@@ -403,10 +444,10 @@ namespace BrazilSharp
                     summation = 0;
                     for (int index = 12, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 1)
                         summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                    CheckingDigit = new int[1];
-                    CheckingDigit[0] = summation % 11;
-                    CheckingDigit[0] = 11 - CheckingDigit[0] > 9 ? 11 - CheckingDigit[0] - 10 : 11 - CheckingDigit[0];
-                    result = Convert.ToInt32(IE.Substring(13, 1)) == CheckingDigit[0];
+                    checkingDigit = new int[1];
+                    checkingDigit[0] = summation % 11;
+                    checkingDigit[0] = 11 - checkingDigit[0] > 9 ? 11 - checkingDigit[0] - 10 : 11 - checkingDigit[0];
+                    result = result && Convert.ToInt32(IE.Substring(13, 1)) == checkingDigit[0];
                 }
                 else
                     result = false;
@@ -416,7 +457,7 @@ namespace BrazilSharp
             public static bool ValidateIE_PI(string IE)
             {
                 //Piauí
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -424,15 +465,17 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit > 9 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit > 9 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_RJ(string IE)
             {
                 // Rio de Janeiro
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 8)
                     return false;
                 while (IE.Length < 8)
@@ -440,26 +483,27 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 6, weight = 2; index >= 0; --index, weight = weight < 7 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = CheckingDigit > 1 ? 11 - CheckingDigit : 0;
-                bool result = Convert.ToInt32(IE.Substring(7, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = checkingDigit > 1 ? 11 - checkingDigit : 0;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(7, 1)) == checkingDigit;
                 return result;
             }
 
             public static bool ValidateIE_RN(string IE)
             {
                 //Rio Grande do Norte
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
-                bool result;
+                IE = Utilities.TakeOnlyNumbers(IE);
+                bool result = !Utilities.IsRepeated(IE);
                 if (IE.StartsWith("20") && (new[] { 9, 10 }).Contains(IE.Length))
                 {
                     int summation = 0;
                     for (int index = IE.Length - 2, weight = 2; index >= 0; --index, ++weight)
                         summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                    int CheckingDigit = summation * 10;
-                    CheckingDigit = CheckingDigit % 11;
-                    CheckingDigit = CheckingDigit > 9 ? 0 : CheckingDigit;
-                    result = Convert.ToInt32(IE.Substring(IE.Length - 1, 1)) == CheckingDigit;
+                    int checkingDigit = summation * 10;
+                    checkingDigit %= 11;
+                    checkingDigit = checkingDigit > 9 ? 0 : checkingDigit;
+                    result = result && Convert.ToInt32(IE.Substring(IE.Length - 1, 1)) == checkingDigit;
                 }
                 else
                     result = false;
@@ -469,7 +513,7 @@ namespace BrazilSharp
             public static bool ValidateIE_RS(string IE)
             {
                 //Rio Grande do Sul
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 10)
                     return false;
                 while (IE.Length < 10)
@@ -479,10 +523,12 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 8, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit;
-                CheckingDigit = CheckingDigit > 9 ? 0 : CheckingDigit;
-                return Convert.ToInt32(IE.Substring(9, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit;
+                checkingDigit = checkingDigit > 9 ? 0 : checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(9, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_RO(string IE)
@@ -496,16 +542,18 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 12, weight = 2; index >= 0; --index, weight = weight < 9 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit;
-                CheckingDigit = CheckingDigit > 9 ? 10 - CheckingDigit : CheckingDigit;
-                return Convert.ToInt32(IE.Substring(13, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit;
+                checkingDigit = checkingDigit > 9 ? 10 - checkingDigit : checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(13, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_SC(string IE)
             {
                 //Santa Catarina
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -513,17 +561,19 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 7, weight = 2; index >= 0; --index, ++weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit;
-                CheckingDigit = CheckingDigit < 2 ? 0 : CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit;
+                checkingDigit = checkingDigit < 2 ? 0 : checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_SP(string IE)
             {
                 //São Paulo
-                bool hasP = IE.StartsWith("P");
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                bool hasLetterP = IE.StartsWith("P");
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 13)
                     return false;
                 while (IE.Length < 12)
@@ -541,25 +591,35 @@ namespace BrazilSharp
                 }
                 int remainder = summation % 11;
                 string strRem = remainder.ToString();
-                int[] CheckingDigit = new int[(hasP ? 1 : 2)];
-                CheckingDigit[0] = Convert.ToInt32(strRem.Substring(strRem.Length - 1, 1));
-                if (hasP) //If the state registration in São Paulo begins with "P", it's because it belongs to rural producers and doesn't have a second checking digit.
-                    return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit[0];//For rural producers, ends here!
-                
+                int[] checkingDigit = new int[(hasLetterP ? 1 : 2)];
+                checkingDigit[0] = Convert.ToInt32(strRem.Substring(strRem.Length - 1, 1));
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit[0];
+                if (hasLetterP)
+                {
+                    /*
+                     *  If the state registration in São Paulo begins with "P", 
+                     *  it's because it belongs to rural producers and doesn't have a second checking digit.
+                     *  
+                     *  For rural producers, ends here!
+                     */
+                    return result;
+                }
                 //For industry and commerce, there is still the validation of the second Checking Digit, which is the routine below:
                 summation = 0;
                 for (int index = 10, weight = 2; index >= 0; --index, weight = weight < 10 ? weight + 1 : 2)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
                 remainder = summation % 11;
                 strRem = remainder.ToString();
-                CheckingDigit[1] = Convert.ToInt32(strRem.Substring(strRem.Length - 1, 1));
-                return Convert.ToInt32(IE.Substring(8, 1)) == CheckingDigit[0] && Convert.ToInt32(IE.Substring(11, 1)) == CheckingDigit[1];
+                checkingDigit[1] = Convert.ToInt32(strRem.Substring(strRem.Length - 1, 1));
+                result = result && Convert.ToInt32(IE.Substring(11, 1)) == checkingDigit[1];
+                return result;
             }
 
             public static bool ValidateIE_SE(string IE)
             {
                 //Sergipe
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length == 0 || IE.Length > 9)
                     return false;
                 while (IE.Length < 9)
@@ -567,15 +627,17 @@ namespace BrazilSharp
                 int summation = 0;
                 for (int index = 0, weight = 9; index < 8; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = 11 - CheckingDigit > 9 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(8, 1)).Equals(CheckingDigit);
+                int checkingDigit = summation % 11;
+                checkingDigit = 11 - checkingDigit > 9 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_TO(string IE)
             {
                 //Tocantins
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if (IE.Length != 11)
                     return false;
                 if (!(new[] { "01", "02", "03", "99" }).Contains(IE.Substring(2, 2)))
@@ -585,27 +647,30 @@ namespace BrazilSharp
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
                 for (int index = 4, weight = 7; index < 10; ++index, --weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 11;
-                CheckingDigit = CheckingDigit < 2 ? 0 : 11 - CheckingDigit;
-                return Convert.ToInt32(IE.Substring(10, 1)) == CheckingDigit;
+                int checkingDigit = summation % 11;
+                checkingDigit = checkingDigit < 2 ? 0 : 11 - checkingDigit;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(10, 1)) == checkingDigit;
+                return result;
             }
 
             public static bool ValidateIE_RR(string IE) 
             {
-                IE = Regex.Replace(IE, @"[^0-9]+", string.Empty);
+                IE = Utilities.TakeOnlyNumbers(IE);
                 if(IE.Length != 9 || IE.Substring(0, 2) != "24")
                     return false;
                 int summation = 0;
                 for (int index = 0, weight = 1; index < 8; ++index, ++weight)
                     summation += weight * Convert.ToInt32(IE.Substring(index, 1));
-                int CheckingDigit = summation % 9;
-                int digit = Convert.ToInt32(IE.Substring(8, 1));
-                return digit == CheckingDigit;
+                int checkingDigit = summation % 9;
+                bool result = !Utilities.IsRepeated(IE);
+                result = result && Convert.ToInt32(IE.Substring(8, 1)) == checkingDigit;
+                return result;
             }
 
             private static bool IsCityValid(int cityCode, string stateCode)
             {
-                Dictionary<int, string> Cities = new Dictionary<int, string>() 
+                Dictionary<int, string> cities = new Dictionary<int, string>() 
                 {   
                     // For more details, see more on https://ibge.gov.br
 
@@ -1966,10 +2031,10 @@ namespace BrazilSharp
                     {4323804,"Xangri-lá"}
                 };
                 
-                foreach (var city in Cities)
+                foreach (var city in cities)
                 {
-                    string CodeCity = city.Key.ToString();
-                    if (CodeCity.Substring(0, 2) == stateCode && Convert.ToInt32(CodeCity.Substring(2, 3)) == cityCode)
+                    string codeCity = city.Key.ToString();
+                    if (codeCity.Substring(0, 2) == stateCode && Convert.ToInt32(codeCity.Substring(2, 3)) == cityCode)
                         return true;
                 }
                 return false;
@@ -1977,65 +2042,5 @@ namespace BrazilSharp
 
         }
     }
-  
-    /// <summary>All Brazilian States. Its value is the Brazilian IBGE state's code.</summary>
-    public enum BrazilianStates
-    {
-        /// <summary>Acre</summary>
-        AC = 12,
-        /// <summary>Alagoas</summary>
-        AL = 27,
-        /// <summary>Amapá</summary>
-        AP = 16,
-        /// <summary>Amazonas</summary>
-        AM = 13,
-        /// <summary>Bahia</summary>
-        BA = 29,
-        /// <summary>Ceará</summary>
-        CE = 23,
-        /// <summary>Federal District (PT-BR: Distrito Federal)</summary>
-        DF = 53,
-        /// <summary>Espírito Santo</summary>
-        ES = 32,
-        /// <summary>Goiás</summary>
-        GO = 52,
-        /// <summary>Maranhão</summary>
-        MA = 21,
-        /// <summary>Mato Grosso</summary>
-        MT = 51,
-        /// <summary>Mato Grosso do Sul</summary>
-        MS = 50,
-        /// <summary>Minas Gerais</summary>
-        MG = 31,
-        /// <summary>Pará</summary>
-        PA = 15,
-        /// <summary>Paraíba</summary>
-        PB = 25,
-        /// <summary>Paraná</summary>
-        PR = 41,
-        /// <summary>Pernambuco</summary>
-        PE = 26,
-        /// <summary>Piauí</summary>
-        PI = 22,
-        /// <summary>Rio Grande do Norte</summary>
-        RN = 24,
-        /// <summary>Rio Grande do Sul</summary>
-        RS = 43,
-        /// <summary>Rio de Janeiro</summary>
-        RJ = 33,
-        /// <summary>Rondônia</summary>
-        RO = 11,
-        /// <summary>Roraima</summary>
-        RR = 14,
-        /// <summary>Santa Catarina</summary>
-        SC = 42,
-        /// <summary>São Paulo</summary>
-        SP = 35,
-        /// <summary>Sergipe</summary>
-        SE = 28,
-        /// <summary>Tocantins</summary>
-        TO = 17,
-        /// <summary>Other unknown state or Out of Brazil. The code is unofficial from Brazilian IBGE state's Code.</summary>
-        ZZ = 99
-    }
+
 }

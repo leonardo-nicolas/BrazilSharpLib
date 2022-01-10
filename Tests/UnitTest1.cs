@@ -10,7 +10,7 @@ namespace Tests
         [SetUp]
         public void Setup()
         {
-            System.Globalization.CultureInfo.CurrentCulture ??= System.Globalization.CultureInfo.CreateSpecificCulture("EN-US");
+            System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("EN-US");
         }
 
         [Test]
@@ -23,7 +23,7 @@ namespace Tests
                 Assert.IsNull(findStateVoterTitle, "Voter Title Is Null. It means that Voter Title number is invalid or it isn't possible to find.");
             else 
                 Assert.IsNotNull(findStateVoterTitle, $"Voter Title isn't null and the result found is {System.Enum.GetName(findStateVoterTitle ?? default)}");
-            Assert.Pass($"Voter Title result for '{VoterTitle}' is {(findStateVoterTitle != null ? System.Enum.GetName(findStateVoterTitle??default) : "null")}");
+            Assert.Pass($"Voter Title result for '{VoterTitle}' is {(findStateVoterTitle != null ? System.Enum.GetName(findStateVoterTitle ??default) : "null")}");
             System.Diagnostics.Debugger.Break();
         }
 
@@ -34,16 +34,16 @@ namespace Tests
         [TestCase(1500.00,false,PeriodType.Day,18)] // Correctly: 18 days without early EarlyWarn
         [TestCase(1500.00,true,PeriodType.Day,12)] //Correctly: 12 days without early warn
         [TestCase(1500.00,false,PeriodType.Day,15)] //Correctly: 15 days without early warn
-        //[TestCase(1500.00,true,PeriodType.Month,13)] // Wrong (throws exception): 13 month with early warn
-        //[TestCase(1500.00,false,PeriodType.Month,25)] //Wrong (throws Exception): 25 month without early warn
-        //[TestCase(1500.00,true,PeriodType.Day,39)] // Wrong (throws exception): 39 days with early warn
-        //[TestCase(1500.00,false,PeriodType.Day,90)] //Wrong (throws Exception): 90 days without early warn
+        [TestCase(1500.00,true,PeriodType.Month,13)] // Wrong (throws exception): 13 month with early warn
+        [TestCase(1500.00,false,PeriodType.Month,25)] //Wrong (throws Exception): 25 month without early warn
+        [TestCase(1500.00,true,PeriodType.Day,39)] // Wrong (throws exception): 39 days with early warn
+        [TestCase(1500.00,false,PeriodType.Day,90)] //Wrong (throws Exception): 90 days without early warn
         public void TestCalculation13th(double BaseCalc, bool EarlyWarn, PeriodType period, short HowLong)
         {
-            var result13th = 0D;
+            double result13Th;
             try
             {
-                result13th = WorkersCalculation.Thirteenth(BaseCalc, EarlyWarn, period, HowLong);
+                result13Th = WorkersCalculation.Thirteenth(BaseCalc, EarlyWarn, period, HowLong);
                 
             }
             catch(System.Exception Ex)
@@ -51,13 +51,13 @@ namespace Tests
                 Assert.Fail($"A fail ocurred: {Ex}");
                 return;
             }
-            Assert.Pass($"Calculation of 13th: {result13th}");
+            Assert.Pass($"Calculation of 13th: {result13Th}");
         }
 
         [Test]
         public void TestExtensions()
         {
-            BrazilianStates stateWhereAuthorLives = BrazilianStates.RJ; //If use ZZ, throws exception
+            BrazilianStates stateWhereAuthorLives = BrazilianStates.ES; //If use ZZ, throws exception
             string fullName = "";
             try
             {
@@ -145,27 +145,27 @@ namespace Tests
         [TestCase(BrazilianStates.SP, "202.003.550.350")]//Commerce and Industry
         [TestCase(BrazilianStates.SP, "P-011000424.3/002")]//Rural Producers
         [TestCase(BrazilianStates.TO, "9003326815-9")]
-        // [TestCase(BrazilianStates.ZZ, "123456789")] //Invalid case: ZZ or different value throws exception.
+        [TestCase(BrazilianStates.ZZ, "123456789")] //Invalid case: ZZ or different value throws exception.
         public void TestStateRegistration(BrazilianStates state, string reg)
         {
             if (state == BrazilianStates.ZZ)
                 System.Diagnostics.Debugger.Break();
-            string? CurrentState = System.Enum.GetName(state);
-            bool isValid = false;
+            string? currentState = System.Enum.GetName(state);
+            bool isValid;
             try
             {                    
                 isValid = Validate.StateRegistration(reg, state);
                 if(isValid)
-                    Assert.IsTrue(isValid,$"'{reg}' is {isValid} for {CurrentState}");
+                    Assert.IsTrue(isValid,$"'{reg}' is {isValid} for {currentState}");
                 else
-                    Assert.IsFalse(isValid,$"'{reg}' is {isValid} for {CurrentState}");
+                    Assert.IsFalse(isValid,$"'{reg}' is {isValid} for {currentState}");
             }
             catch (System.Exception Ex)
             {
-                Assert.Fail($"State that caused fail: {CurrentState + System.Environment.NewLine}Who caused fail: {Ex} ");
+                Assert.Fail($"State that caused fail: {currentState + System.Environment.NewLine}Who caused fail: {Ex} ");
                 return;
             }
-            Assert.Pass($"'{reg}' is {isValid} for {CurrentState}");
+            Assert.Pass($"'{reg}' is {isValid} for {currentState}");
         }
     }
 }

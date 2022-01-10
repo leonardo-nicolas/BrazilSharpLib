@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace BrazilSharp
 {
@@ -53,42 +51,48 @@ namespace BrazilSharp
                     svt = string.Empty;
                     break;
                 case char[] chArray:
-                    svt = new String(chArray);
+                    svt = new string(chArray);
                     break;
                 case string str:
                     svt = str;
                     break;
                 case Array arr:
-                    svt = String.Join("", arr);
+                    svt = string.Join("", arr);
                     break;
                 default:
                     svt = Convert.ToString(Expression);
                     break;
             }
-            svt = Regex.Replace(svt, @"[^0-9]+", string.Empty);
-            if(svt.Length == 0 || svt.Length > 12)
-                return null;
-            while(svt.Length < 12)
-                svt = svt.Insert(0, "0");
-            int[] CheckingDigit = new int[2], gotDigit={Convert.ToInt32(svt.Substring(10, 1)),Convert.ToInt32(svt.Substring(11,1))};
-            int summation = 0;
-            short stateCode = Convert.ToInt16(svt.Substring(8, 2));
-            for (int index = 0, weight = 2; index < 8; ++index, ++weight)
-                summation += weight * Convert.ToInt32(svt.Substring(index,1));
-            CheckingDigit[0] = summation % 11;
-            CheckingDigit[0] = CheckingDigit[0] > 9 ? 0 : CheckingDigit[0];
-            summation = 0;
-            for (int index = 8, weight = 7; index < 11; ++index, ++weight)
-                summation += weight * Convert.ToInt32(svt.Substring(index,1));
-            CheckingDigit[1] = summation % 11;
-            CheckingDigit[1] = CheckingDigit[1] > 9 ? 0 : CheckingDigit[1];
-            
-            if(!gotDigit.SequenceEqual(CheckingDigit))
+            if(!Validate.VoterTitle(svt))
                 return null;
             else
-                return TREBrazilianStatesCode.Where(data => Convert.ToInt16(svt.Substring(8, 2)) == data.Value).FirstOrDefault().Key;
+                return TREBrazilianStatesCode
+                    .FirstOrDefault(data => 
+                        Convert.ToInt16(
+                            svt.Substring(8, 2)
+                        ) == data.Value
+                    ).Key;
         }
 
+        internal static string TakeOnlyNumbers(string entry)
+        {
+            string mount = string.Empty;
+            char[] chArray = entry.ToCharArray();
+            foreach(char chr in chArray)
+                if(char.IsNumber(chr))
+                    mount += Convert.ToString(chr);
+            return mount;
+        }
         
+        internal static bool IsRepeated(string str)
+        {
+            int summation = 0;
+            char firstChar = Convert.ToChar(str.Substring(0, 1));
+            char[] chArray = str.ToCharArray();
+            foreach(char chr in chArray)
+                if (chr == firstChar)
+                    ++summation;
+            return summation == str.Length;
+        }
     }
 }

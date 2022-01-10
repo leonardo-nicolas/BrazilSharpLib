@@ -5,20 +5,20 @@ namespace BrazilSharp
     [DebuggerStepThrough]
     internal class LanguageThrowHelper
     {
-        internal readonly int dwRegion;
-        internal readonly string lpCountryAndLang;
-        internal LanguageThrowHelper(int dwRegion, string lpCountryAndLang) {
-            this.dwRegion = dwRegion;
-            this.lpCountryAndLang = lpCountryAndLang;
+        internal int DwRegion { get; }
+        internal string LpCountryAndLang { get; }
+        internal LanguageThrowHelper(int dwRegion, string lpCountryAndLang)
+        {
+            DwRegion = dwRegion;
+            LpCountryAndLang = lpCountryAndLang;
             MsgErrorStateRegistration = string.Empty;
             MsgErrorNameBrazilianState = string.Empty;
-            MsgErrorThirteenthOutOfRange_Day = string.Empty;
-            MsgErrorThirteenthOutOfRange_Month = string.Empty;
+            MsgErrorThirteenthOutOfRangeWithDay = string.Empty;
+            MsgErrorThirteenthOutOfRangeWithMonth = string.Empty;
         }
-        public string 
-            MsgErrorStateRegistration,
-            MsgErrorNameBrazilianState,
-            MsgErrorThirteenthOutOfRange_Day, 
-            MsgErrorThirteenthOutOfRange_Month;
+        public string MsgErrorStateRegistration { get; internal set; }
+        public string MsgErrorNameBrazilianState { get; internal set; }
+        public string MsgErrorThirteenthOutOfRangeWithDay { get; internal set; }
+        public string MsgErrorThirteenthOutOfRangeWithMonth { get; internal set; }
     }
 }

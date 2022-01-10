@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using BrazilSharp.Exceptions;
 
 namespace BrazilSharp
@@ -8,9 +6,6 @@ namespace BrazilSharp
     /// <summary>Set of static methods to extends some classes.</summary>
     public static class Extensions 
     {
-        [DebuggerStepThrough]
-        internal static string GetEnumName<T>(T value) where T:Enum => Enum.GetName(typeof(T), value);
-
         /// <summary>Gets Full name of this state</summary>
         /// <param name="bs">Source of <see cref="BrazilianStates"/>' object.</param>
         /// <returns>A <see cref="String"/> containing full name of brazilian state. E.G: <see cref="BrazilianStates.RJ"/> => "Rio de Janeiro". </returns>

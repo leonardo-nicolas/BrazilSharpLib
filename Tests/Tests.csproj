@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\BrazilSharp.csproj" />
+    <ProjectReference Include="..\Source\BrazilSharp.csproj" />
   </ItemGroup>
 
 </Project>

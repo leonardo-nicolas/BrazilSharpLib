@@ -495,3 +495,21 @@ BrazilSharpVector-Inkscape.svg
 BrazilSharpVector.png
 Readme Example F Sharp
 src/README-br.md
+Source
+
+# Custom
+Source/[Dd]ebug/
+Source/[Dd]ebugPublic/
+Source/[Rr]elease/
+Source/[Rr]eleases/
+Source/x64/
+Source/x86/
+Source/[Ww][Ii][Nn]32/
+Source/[Aa][Rr][Mm]/
+Source/[Aa][Rr][Mm]64/
+Source/bld/
+Source/[Bb]in/
+Source/[Oo]bj/
+Source/[Ll]og/
+Source/[Ll]ogs/
+Source/README-br.md

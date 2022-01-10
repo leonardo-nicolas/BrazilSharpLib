@@ -2,6 +2,8 @@ using System;
 
 namespace BrazilSharp.Calculations
 {
+    // TODO: Add calculations for financial and another calculations for brazilians' labors.
+
     /// <summary>Set of static methods for calculating labor debts, based on the consolidation of Brazilian labor laws.</summary>
     public static class WorkersCalculation
     {
@@ -17,7 +19,7 @@ namespace BrazilSharp.Calculations
                 throw new ArgumentOutOfRangeException(ThrowHelper.GetMsgErrorThirteenthOutOfRange(Regime), nameof(HowLongWorked));
             double avos;
             if (Regime == PeriodType.Month)
-                avos = ((double)HowLongWorked + (EarlyWarning ? 1D : 0D)) / 12D;
+                avos = (HowLongWorked + (EarlyWarning ? 1D : 0D)) / 12D;
             else if (Regime == PeriodType.Day)
                 if (HowLongWorked < 15)
                     avos = 0D;
@@ -27,15 +29,5 @@ namespace BrazilSharp.Calculations
                 avos = 1D;
             return avos * CalculationBasis;
         }
-    
-    
-    }
-
-    /// <summary>Period Indicator for Calculations</summary>
-    public enum PeriodType{
-        /// <summary>Calculate based on days</summary>
-        Day,
-        /// <summary>Calculate based on months</summary>
-        Month
     }
 }
