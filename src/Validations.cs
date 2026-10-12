@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Reflection;
+using System.Text;
 using BrazilSharp.Exceptions;
 
 namespace BrazilSharp {
@@ -190,7 +190,18 @@ namespace BrazilSharp {
                 return StateRegistration((ReadOnlySpan<char>)chars, state);
 
             if (Expression is Array array)
-                return StateRegistration(string.Join("", array), state);
+            {
+                StringBuilder builder = new StringBuilder(array.Length);
+                foreach (object item in array)
+                {
+                    if (item == null)
+                        return false;
+
+                    builder.Append(Convert.ToString(item, System.Globalization.CultureInfo.InvariantCulture));
+                }
+
+                return StateRegistration(builder.ToString(), state);
+            }
 
             return StateRegistration(Convert.ToString(Expression), state);
         }
