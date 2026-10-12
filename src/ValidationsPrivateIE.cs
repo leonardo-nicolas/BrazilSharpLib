@@ -315,14 +315,11 @@ namespace BrazilSharp
                     padded[0] = '0';
                     padded[1] = '0';
                     d.CopyTo(padded.Slice(2));
-                    d = padded;
-                }
-                else if (d.Length != 11)
-                {
-                    return false;
+                    return Mod11(AscendingRightSum(padded, 10)) == Digit(padded, 10);
                 }
 
-                return Mod11(AscendingRightSum(d, 10)) == Digit(d, 10);
+                return d.Length == 11 &&
+                       Mod11(AscendingRightSum(d, 10)) == Digit(d, 10);
             }
 
             private static bool IsMs(ReadOnlySpan<char> d) =>
