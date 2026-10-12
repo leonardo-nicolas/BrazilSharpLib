@@ -56,6 +56,18 @@ namespace BrazilSharp.Tests
         [InlineData(BrazilianStates.MT, "00130000019")]
         [InlineData(BrazilianStates.TO, "290319986")]
         [InlineData(BrazilianStates.PE, "032141840")]
+        // Additional generated vectors for documented exceptional ranges/formats.
+        [InlineData(BrazilianStates.DF, "0800000000095")]
+        [InlineData(BrazilianStates.RN, "2000000002")]
+        [InlineData(BrazilianStates.PE, "00000000000019")]
+        [InlineData(BrazilianStates.TO, "29010000009")]
+        [InlineData(BrazilianStates.AP, "030123459")]
+        [InlineData(BrazilianStates.AP, "030170007")]
+        [InlineData(BrazilianStates.AP, "030170011")]
+        [InlineData(BrazilianStates.AP, "030190225")]
+        [InlineData(BrazilianStates.AP, "030190231")]
+        [InlineData(BrazilianStates.GO, "110944020")]
+        [InlineData(BrazilianStates.GO, "110944021")]
         public void AcceptsImportantStateSpecificVariants(BrazilianStates state, string number)
         {
             Assert.True(Validate.StateRegistration(number, state));
