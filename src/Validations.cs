@@ -182,41 +182,17 @@ namespace BrazilSharp {
         public static bool StateRegistration(object Expression, BrazilianStates state) {
             if (Expression == null)
                 return false;
-            BrazilianStates[] arrbs = (BrazilianStates[])Enum.GetValues(typeof(BrazilianStates));
-            if (state == BrazilianStates.ZZ || (int)state == 99 || !arrbs.Contains(state))
-                throw new StateNotFoundException(ThrowHelper.GetMsgErrorStateRegistration());
-            string strExp;
-            switch (Expression)
-            {
-                case char[] chArray:
-                    strExp = new String(chArray);
-                    break;
-                case string str:
-                    strExp = str;
-                    break;
-                case Array arr:
-                    strExp = String.Join("", arr);
-                    break;
-                default:
-                    strExp = Convert.ToString(Expression);
-                    break;
-            }
-            bool result = strExp.Length > 0;
-            result = result && !IsRepeated(strExp);
-            result = result && Convert.ToBoolean(
-                
-                typeof(_InternalMethodsValidateIE)
-                .GetTypeInfo()
-                .GetMethod(
-                    "ValidateIE_" + 
-                    Enum.GetName(typeof(BrazilianStates), state)
-                )
-                .Invoke(
-                    null, 
-                    new string[] { strExp }
-                )
-            );
-            return result;
+
+            if (Expression is string text)
+                return StateRegistration(text, state);
+
+            if (Expression is char[] chars)
+                return StateRegistration((ReadOnlySpan<char>)chars, state);
+
+            if (Expression is Array array)
+                return StateRegistration(string.Join("", array), state);
+
+            return StateRegistration(Convert.ToString(Expression), state);
         }
 
         /// <summary>Test any expression or object and determinate it if is a valid Date or Time!</summary>
