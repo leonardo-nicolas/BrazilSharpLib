@@ -104,6 +104,13 @@ namespace BrazilSharp.Tests
         }
 
         [Fact]
+        public void LegacyObjectArrayConcatenatesElements()
+        {
+            int[] digits = { 1, 1, 0, 0, 4, 2, 4, 9, 0, 1, 1, 4 };
+            Assert.True(Validate.StateRegistration((object)digits, BrazilianStates.SP));
+        }
+
+        [Fact]
         public void UnknownUfUsesOriginalExceptionContract()
         {
             Assert.Throws<StateNotFoundException>(
